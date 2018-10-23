@@ -38,14 +38,14 @@ class WikipediaApi(object):
         print("took {} seconds to fetch {} summaries".format(time() - ts, len(titles)))
         return summaries
 
-    def get_links(self, title):
+    def get_text_and_links(self, title):
         r = self.get_page(title)
         response = BeautifulSoup(r.text, 'html.parser')
         links = response.find_all('a')
-        unique_links = set([link["href"].split("/")[-1]
+        unique_links = set([link["href"].split("/")[-1].split("#")[0]
                             for link in links
                             if link.parent.name == "p" and link.class_ != "new"])
-        return unique_links
+        return response.text, unique_links
 
     class WikipediaSummaryWorker(Thread):
         def __init__(self, queue, api_root, headers, results, cache):
@@ -78,6 +78,6 @@ class WikipediaApi(object):
 if __name__ == "__main__":
     wiki = WikipediaApi()
     start = "Cattle"
-    adjacent = wiki.get_links(start)
+    adjacent = wiki.get_text_and_links(start)[1]
     results = wiki.get_summaries(adjacent)
     wiki.get_summaries(adjacent)  # test caching
