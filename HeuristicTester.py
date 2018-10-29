@@ -1,8 +1,11 @@
+import logging
 import pprint
 import time
 
 import WikiAgent
 from Heuristics import *
+
+log = logging.getLogger(__name__)
 
 
 class HeuristicTester:
@@ -11,16 +14,16 @@ class HeuristicTester:
         agent = WikiAgent.WikiAgent()
         results = []
         for heuristic in args:
-            print("testing heuristic {} with start {} and end {}"
-                  .format(heuristic.__name__, start, stop))
+            log.info("Testing heuristic {} with start {} and end {}"
+                     .format(heuristic.__name__, start, stop))
             start_time = time.time()
             path, expanded_count = agent.search(start, stop, heuristic)
             search_time = time.time() - start_time
-            print("found path of length {} in {} seconds with {} expansions: {}"
-                  .format(len(path),
-                          search_time,
-                          expanded_count,
-                          path if len(path) < 10 else path[0:5] + ["..."] + path[-5:]))
+            log.info("Found path of length {} in {} seconds with {} expansions: {}"
+                     .format(len(path),
+                             search_time,
+                             expanded_count,
+                             path if len(path) < 10 else path[0:5] + ["..."] + path[-5:]))
             results.append(
                 {
                     "heuristic": heuristic.__name__,
@@ -30,6 +33,7 @@ class HeuristicTester:
                     "path": path if len(path) < 10 else path[0:5] + ["..."] + path[-5:]
                 }
             )
+            log.info(results)
         return results
 
 

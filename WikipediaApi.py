@@ -1,10 +1,14 @@
 import json
+import logging
 from queue import Queue
 from threading import Thread
 from time import time
 
 import requests
 from bs4 import BeautifulSoup
+
+log = logging.getLogger(__name__)
+logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)  # Don't want these requests filling the logs
 
 
 class WikipediaApi(object):
@@ -22,7 +26,7 @@ class WikipediaApi(object):
         """
         Bulk fetch summaries for a list of titles
         :param titles: A list of article titles
-        :return: ???
+        :return: A dict of titles to summary strings
         """
         ts = time()
         queue = Queue()
@@ -32,10 +36,9 @@ class WikipediaApi(object):
             worker.daemon = True
             worker.start()
         for title in titles:
-            # print("queuing " + title)
             queue.put(title)
         queue.join()
-        print("took {} seconds to fetch {} summaries".format(time() - ts, len(titles)))
+        log.debug("Took {} seconds to fetch {} summaries".format(time() - ts, len(titles)))
         return summaries
 
     def get_text_and_links(self, title):
@@ -74,10 +77,3 @@ class WikipediaApi(object):
                     finally:
                         self.queue.task_done()
 
-
-if __name__ == "__main__":
-    wiki = WikipediaApi()
-    start = "Cattle"
-    adjacent = wiki.get_text_and_links(start)[1]
-    results = wiki.get_summaries(adjacent)
-    wiki.get_summaries(adjacent)  # test caching
