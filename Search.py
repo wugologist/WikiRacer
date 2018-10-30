@@ -25,11 +25,11 @@ class Search:
             content, neighbors = self.get_content_and_neighbors(node)
             nodes_expanded += 1
             log.debug("Got {} neighbors for {}: {}".format(len(neighbors),
-                                                       node,
-                                                       path if len(path) < 10 else path[0:5] + ["..."] + path[-5:]))
+                                                           node,
+                                                           path if len(path) < 10 else path[0:5] + ["..."] + path[-5:]))
             for neighbor in neighbors:
                 if neighbor not in visited:
-                    heuristic = self.heuristic(node, start, goal, content, neighbors)
+                    heuristic = self.heuristic(neighbor, start, goal, content, neighbors)
                     priority_queue.put((cost + heuristic, path + [neighbor], neighbor))
         log.warning("No path found!")
         return [], nodes_expanded  # no path found
