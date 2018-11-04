@@ -48,10 +48,12 @@ def initialize_logger(arguments):
 
 def run_search(arguments):
     heuristic = getattr(Heuristics, arguments.heuristic, None)
+
     if heuristic is None:
         log.error("{} is not a valid heuristic. Options: {}"
                   .format(arguments.heuristic,
                           list(filter(lambda x: x[0] != "_", dir(Heuristics)))))  # filter out dunder methods
+        raise ValueError("Invalid heuristic") 
 
     api = WikipediaApi.WikipediaApi()
     start = api.get_canonical_name(arguments.start)
