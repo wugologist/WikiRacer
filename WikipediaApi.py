@@ -22,6 +22,10 @@ class WikipediaApi(object):
         url = self.api_root + "page/html/" + title
         return requests.get(url, headers=self.headers)
 
+    def get_random_page(self):
+        url = self.api_root + "page/random/html"
+        return requests.get(url, headers=self.headers)
+
     def get_summaries(self, titles):
         """
         Bulk fetch summaries for a list of titles
