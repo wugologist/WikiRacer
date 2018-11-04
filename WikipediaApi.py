@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)  # Don't want these requests filling the logs
 
 
-class WikipediaApi(object):
+class WikipediaApi:
     def __init__(self):
         self.api_root = "https://en.wikipedia.org/api/rest_v1/"
         self.headers = {'User-Agent': 'wong.mich@husky.neu.edu'}  # Wikipedia asks to provide contact info in user agent
@@ -51,8 +51,19 @@ class WikipediaApi(object):
         links = response.find_all('a')
         unique_links = set([link["href"].split("/")[-1].split("#")[0]
                             for link in links
-                            if link.parent.name == "p" and link.class_ != "new"])
+                            if link.parent.name == "p" and link.class_ != "new"])  # ignore links to nonexistent pages
         return response.text, unique_links
+
+    def get_canonical_name(self, title):
+        """
+        Get the official name of an article. Useful because we just check string equality for the goal test,
+        so we don't want to skip over the goal if e.g. the capitalization is off
+        :return: The canonical name of the given page
+        """
+        page = self.get_page(title)
+        if page.status_code != 200:
+            raise IOError("{} not a valid page title".format(title))
+        return page.url.split("/")[-1]
 
     class WikipediaSummaryWorker(Thread):
         def __init__(self, queue, api_root, headers, results, cache):

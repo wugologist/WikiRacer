@@ -4,8 +4,9 @@ import logging
 import os
 import sys
 
-import Heuristics
 import HeuristicTester
+import Heuristics
+import WikipediaApi
 
 log = logging.getLogger(__name__)
 
@@ -49,7 +50,10 @@ def run_search(arguments):
                   .format(arguments.heuristic,
                           list(filter(lambda x: x[0] != "_", dir(Heuristics)))))  # filter out dunder methods
 
-    HeuristicTester.HeuristicTester.compare_heuristics(arguments.start, arguments.goal, heuristic)
+    api = WikipediaApi.WikipediaApi()
+    start = api.get_canonical_name(arguments.start)
+    goal = api.get_canonical_name(arguments.goal)
+    HeuristicTester.HeuristicTester.compare_heuristics(start, goal, heuristic)
 
 
 if __name__ == "__main__":
