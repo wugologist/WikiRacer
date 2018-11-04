@@ -34,10 +34,12 @@ def initialize_logger(arguments):
     handlers = []
 
     if not arguments.only_console:
+        if not os.path.exists("logs/"):
+            os.makedirs("logs/")
         filename = "logs/{}.log".format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
         handlers.append(logging.FileHandler(filename))
 
-    if not arguments.only_console:
+    if not arguments.only_file:
         handlers.append(logging.StreamHandler(sys.stdout))
 
     logging.basicConfig(
