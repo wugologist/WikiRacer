@@ -1,5 +1,4 @@
-import Search
-import WikipediaApi
+from src import WikipediaApi, Search
 
 
 class WikiAgent:

@@ -2,8 +2,8 @@ import logging
 import pprint
 import time
 
-import WikiAgent
-from Heuristics import *
+from src import WikiAgent
+from src.heuristics.Heuristics import *
 
 log = logging.getLogger(__name__)
 

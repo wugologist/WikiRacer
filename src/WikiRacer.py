@@ -6,21 +6,23 @@ import logging
 import os
 import sys
 
-import HeuristicTester
-import Heuristics
-import WikipediaApi
+from src import WikipediaApi, HeuristicTester
+from src.heuristics import Heuristics
 
 log = logging.getLogger(__name__)
 
-def getValidHeuristics():
+
+def get_valid_heuristics():
     return list(filter(lambda x: x[0] != "_", dir(Heuristics))) # filter out dunder methods
+
 
 def parse(argv):
     parser = argparse.ArgumentParser(description="Find a path between Wikipedia pages with the given heuristic",
                                      prog=argv[0])
     parser.add_argument("start", help="The starting article name")
     parser.add_argument("goal", help="The goal page name")
-    parser.add_argument("--heuristic", help="The heuristic function to use. One of {}".format(getValidHeuristics()), required=True)
+    parser.add_argument("--heuristic", help="The heuristic function to use. One of {}".format(get_valid_heuristics()),
+                        required=True)
     parser.add_argument("--quiet", "-q", help="Create fewer log messages", action="count")
     parser.add_argument("--no-console", help="Disable console logging", action="store_true")
     parser.add_argument("--no-file", help="Disable file logging", action="store_true")
@@ -54,7 +56,7 @@ def run_search(arguments):
     heuristic = getattr(Heuristics, arguments.heuristic, None)
 
     if heuristic is None:
-        log.error("{} is not a valid heuristic. Options: {}".format(arguments.heuristic, getValidHeuristics()))
+        log.error("{} is not a valid heuristic. Options: {}".format(arguments.heuristic, get_valid_heuristics()))
         raise ValueError("Invalid heuristic")
 
     api = WikipediaApi.WikipediaApi()
