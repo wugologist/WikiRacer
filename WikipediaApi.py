@@ -3,6 +3,7 @@ import logging
 from queue import Queue
 from threading import Thread
 from time import time
+from IWikiApi import IWikiApi
 
 import requests
 from bs4 import BeautifulSoup
@@ -11,7 +12,7 @@ log = logging.getLogger(__name__)
 logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)  # Don't want these requests filling the logs
 
 
-class WikipediaApi:
+class WikipediaApi(IWikiApi):
     def __init__(self):
         self.api_root = "https://en.wikipedia.org/api/rest_v1/"
         self.headers = {'User-Agent': 'wong.mich@husky.neu.edu'}  # Wikipedia asks to provide contact info in user agent
