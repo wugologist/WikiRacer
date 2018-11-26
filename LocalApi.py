@@ -1,6 +1,6 @@
 import logging
 import bz2
-import pickletools
+import pickle
 import itertools
 import xml.etree.ElementTree as xml
 import mwparserfromhell
@@ -62,7 +62,7 @@ class WikipediaIndexFile:
                 log.debug("Using pickled article file")
                 self.articles = pickle.load(articles_pickle_file)
         except:
-            log.debug("Unable to used pickled articles, doing a manual load of the index file")
+            log.debug("Unable to use pickled articles, doing a manual load of the index file")
             self.manual_load()
             with open("articles.pickle.tmp", "wb") as articles_pickle_file:
                 log.debug("Saving articles as a pickled dump to speed up future loads")

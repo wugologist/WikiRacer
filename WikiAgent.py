@@ -1,10 +1,8 @@
 import Search
-import WikipediaApi
-
 
 class WikiAgent:
-    def __init__(self):
-        self.wikipedia_api = WikipediaApi.WikipediaApi()
+    def __init__(self, api):
+        self.wikipedia_api = api
 
     def search(self, start, end, heuristic):
         search = Search.Search(self.wikipedia_api.get_text_and_links,

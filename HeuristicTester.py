@@ -10,8 +10,8 @@ log = logging.getLogger(__name__)
 
 class HeuristicTester:
     @staticmethod
-    def compare_heuristics(start, stop, *args):
-        agent = WikiAgent.WikiAgent()
+    def compare_heuristics(start, stop, api, *args):
+        agent = WikiAgent.WikiAgent(api)
         results = []
         for heuristic in args:
             log.info("Testing heuristic {} with start {} and end {}"
