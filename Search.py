@@ -5,8 +5,8 @@ log = logging.getLogger(__name__)
 
 
 class Search:
-    def __init__(self, get_content_and_neighbors, heuristic):
-        self.get_content_and_neighbors = get_content_and_neighbors
+    def __init__(self, api, heuristic):
+        self.api = api
         self.heuristic = heuristic
 
     def a_star(self, start, goal):
@@ -22,7 +22,9 @@ class Search:
             visited.add(node)
             if node == goal:
                 return path, nodes_expanded
-            content, neighbors = self.get_content_and_neighbors(node)
+            if not self.api.is_valid_article(node):
+                continue
+            content, neighbors = self.api.get_text_and_links(node)
             nodes_expanded += 1
             log.debug("Got {} neighbors for {}: {}".format(len(neighbors),
                                                            node,

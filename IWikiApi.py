@@ -2,14 +2,26 @@ class IWikiApi:
     """
     Interface for Wikipedia APIs
     """
-    
+
     def load(self):
         """
         Does whatever loading the API need to do. This method is expected to potentially take some time.
         By default does nothing, but can be overridden if the subclass needs to do some set up.
         """
         pass
-            
+
+    def is_valid_article(self, title):
+        """
+        Return True IFF the page has a canonical name.
+        
+        TODO This should be memoized which would improve performance a ton.
+        """
+        try:
+            self.get_canonical_name(title)
+            return True
+        except IOError:
+            return False
+
     def get_random_page(self):
         """
         Return a random page

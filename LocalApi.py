@@ -61,7 +61,7 @@ class WikipediaIndexFile:
             with open("articles.pickle.tmp", "rb") as articles_pickle_file:
                 log.debug("Using pickled article file")
                 self.articles = pickle.load(articles_pickle_file)
-        except:
+        except IOError:
             log.debug("Unable to use pickled articles, doing a manual load of the index file")
             self.manual_load()
             with open("articles.pickle.tmp", "wb") as articles_pickle_file:
