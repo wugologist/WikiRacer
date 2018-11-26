@@ -1,3 +1,4 @@
+import random
 import logging
 import bz2
 import pickle
@@ -67,7 +68,7 @@ class WikipediaIndexFile:
             with open("articles.pickle.tmp", "wb") as articles_pickle_file:
                 log.debug("Saving articles as a pickled dump to speed up future loads")
                 pickle.dump(self.articles, articles_pickle_file)
-    
+
     def get_range(self, title):
         """
         Find the range of bytes for a given article based on the title.
@@ -81,7 +82,12 @@ class WikipediaIndexFile:
         Return True IFF the article exists in the dictionary
         """
         return title in self.articles.keys()
-        
+
+    def get_random_title(self):
+        """
+        Return a random title from the list of articles
+        """
+        return random.choice(self.articles.keys())
 
 class LocalWikipediaApi(IWikiApi):
     def __init__(self, index_file, bz_xml_file):
@@ -135,7 +141,7 @@ class LocalWikipediaApi(IWikiApi):
         return parsed
 
     def page_exists(self, title):
-        """ 
+        """
         Return True IFF the page exists
         """
         return self.index_file.page_exists(title)
@@ -143,7 +149,7 @@ class LocalWikipediaApi(IWikiApi):
     def is_redirect_page(self, title):
         """
         Returns True IFF the page is a redirect page
-        
+
         From Wikipedia (https://en.wikipedia.org/wiki/Help:Redirect):
         A page is treated as a redirect page if its wikitext begins with #REDIRECT followed by a valid wikilink or interwikilink. 
         A space is usually left before the link. (Note that some alternative capitalizations of "REDIRECT" are possible.)
@@ -153,7 +159,7 @@ class LocalWikipediaApi(IWikiApi):
     def get_redirect_target(self, title):
         """
         Returns the target of a wikipedia redirect page. This is the target of the first link on the page.
-        
+
         From Wikipedia:
         A page is treated as a redirect page if its wikitext begins with #REDIRECT followed by a valid wikilink or interwikilink. 
         A space is usually left before the link. (Note that some alternative capitalizations of "REDIRECT" are possible.)
@@ -167,9 +173,8 @@ class LocalWikipediaApi(IWikiApi):
     def get_random_page(self):
         """
         Return a random page
-        Not implemented yet
         """
-        raise Error("Method not implemented yet! If you need it, :bee: :change:")
+        return self.index_file.get_random_title()
 
     def get_summaries(self, titles):
         """
@@ -194,11 +199,11 @@ class LocalWikipediaApi(IWikiApi):
         links = parsed.ifilter_wikilinks(recursive=True)
         unique_links = set([link.title.strip_code().split("#")[0] for link in links])
         return text, unique_links
-    
+
     def get_name_variants(self, title):
         """
         Get potential variants for a title
-        
+
         Eg, on input: A joUrNey tO WonderLAND
         - uppercase: A JOURNEY TO WONDERLAND
         - lowercase: a journey to wonderland
@@ -240,3 +245,4 @@ class LocalWikipediaApi(IWikiApi):
                     except IOError:
                         continue
             raise IOError("{} not a valid page title".format(title))
+
