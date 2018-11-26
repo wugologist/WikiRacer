@@ -27,6 +27,7 @@ class WikipediaIndexFile:
         self.index_file = index_file
         self.xml_file_size = xml_file_size
         self.articles = {}
+        self.article_titles = []
 
     def manual_load(self):
         """
@@ -68,6 +69,7 @@ class WikipediaIndexFile:
             with open("articles.pickle.tmp", "wb") as articles_pickle_file:
                 log.debug("Saving articles as a pickled dump to speed up future loads")
                 pickle.dump(self.articles, articles_pickle_file)
+        self.article_titles = list(self.articles.keys())
 
     def get_range(self, title):
         """
@@ -81,13 +83,13 @@ class WikipediaIndexFile:
         """
         Return True IFF the article exists in the dictionary
         """
-        return title in self.articles.keys()
+        return title in self.article_titles
 
     def get_random_title(self):
         """
         Return a random title from the list of articles
         """
-        return random.choice(self.articles.keys())
+        return random.choice(self.article_titles)
 
 class LocalWikipediaApi(IWikiApi):
     def __init__(self, index_file, bz_xml_file):
