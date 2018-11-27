@@ -3,4 +3,4 @@ __pycache__/
 logs/
 corpera/
 **.pyc
-Tests/results.txt
+Tests/results.*
