@@ -46,13 +46,20 @@ class WikipediaApi:
         return summaries
 
     def get_text_and_links(self, title):
-        r = self.get_page(title)
-        response = BeautifulSoup(r.text, 'html.parser')
+        return self.extract_text_and_links(self.get_page(title))
+
+    def get_random_text_and_links(self):
+        return self.extract_text_and_links(self.get_random_page())
+
+    @staticmethod
+    def extract_text_and_links(page):
+        response = BeautifulSoup(page.text, 'html.parser')
         links = response.find_all('a')
         unique_links = set([link["href"].split("/")[-1].split("#")[0]
                             for link in links
                             if link.parent.name == "p" and link.class_ != "new"])  # ignore links to nonexistent pages
-        return response.text, unique_links
+        parsed_text = " ".join(map(lambda x: x.text, response.find_all("p")))
+        return parsed_text, unique_links
 
     def get_canonical_name(self, title):
         """
