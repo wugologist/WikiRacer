@@ -238,6 +238,7 @@ class LocalWikipediaApi(IWikiApi):
             - Attempt to perform auto capitalization on the title to see if any of those pages exist, in which case recur on them
             - If all fails, raise IOError
         """
+        title = title.replace("_", " ")
         if self.page_exists(title):
             if self.is_redirect_page(title):
                 return self.get_canonical_name(self.get_redirect_target(title))
@@ -264,7 +265,7 @@ if __name__ == "__main__":
     print("Loading the index...")
     api.load()
     print("Done loading!")
-    print("Validness of \"programming language\" is:", api.is_valid_article("programming language"))
+    print("Validness of \"Sybra_fuscotriangularis\" is:", api.is_valid_article("Sybra_fuscotriangularis"))
     links = api.get_text_and_links("programming language")[1]
     print("Links of \"programming language\" are:", links)
     for link in links:
@@ -274,3 +275,7 @@ if __name__ == "__main__":
     print("Text and links of \"uK\" is:", api.get_text_and_links("uK"))
     print("Here are a few random page titles:", api.get_random_page(), api.get_random_page(), api.get_random_page())
     print("Get summaries of [\"A\", \"B\", \"Water\"] returns:", api.get_summaries(["A", "B", "Water"]))
+    print("Testing to see if any articles contain a _ in their name:")
+    for title in api.index_file.article_titles:
+        if "_" in title:
+            print("title contains underscore:", title)
