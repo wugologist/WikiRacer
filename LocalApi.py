@@ -220,7 +220,7 @@ class LocalWikipediaApi(IWikiApi):
         """
         return [title.capitalize(), titlecase(title), title.title(), title.lower(), title.upper()]
 
-    def get_canonical_name(self, title, try_naming_variants=True):
+    def get_canonical_name(self, title, try_naming_variants=True, blacklist=[]):
         """
         Get the official name of an article. Useful because we just check string equality for the goal test,
         so we don't want to skip over the goal if e.g. the capitalization is off
@@ -239,16 +239,18 @@ class LocalWikipediaApi(IWikiApi):
             - If all fails, raise IOError
         """
         title = title.replace("_", " ")
+        if title in blacklist:
+            raise IOError("{} not a valid page title (in the blacklist {})".format(title, blacklist))
         if self.page_exists(title):
             if self.is_redirect_page(title):
-                return self.get_canonical_name(self.get_redirect_target(title))
+                return self.get_canonical_name(self.get_redirect_target(title), blacklist=blacklist + [title])
             else:
                 return title
         else:
             if try_naming_variants:
                 for variant in self.get_name_variants(title):
                     try:
-                        return self.get_canonical_name(variant, try_naming_variants=False)
+                        return self.get_canonical_name(variant, try_naming_variants=False, blacklist=blacklist + [title])
                     except IOError:
                         continue
             raise IOError("{} not a valid page title".format(title))
@@ -265,6 +267,7 @@ if __name__ == "__main__":
     print("Loading the index...")
     api.load()
     print("Done loading!")
+    print("Canonical name of \"programming language\" is:", api.get_canonical_name("programming language"))
     print("Validness of \"Sybra_fuscotriangularis\" is:", api.is_valid_article("Sybra_fuscotriangularis"))
     links = api.get_text_and_links("programming language")[1]
     print("Links of \"programming language\" are:", links)
