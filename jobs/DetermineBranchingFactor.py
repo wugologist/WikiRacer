@@ -1,13 +1,14 @@
 from src import WikipediaApi
 
 
-def determine_branching_factor(samples):
+def determine_branching_factor(samples, api):
     """
     Determine the branching factor of Wikipedia articles through random sampling
     :param samples: The number of random articles to sample
+    :param api: The API class to use (online or local)
     :return: The average number of links per article sampled
     """
-    wiki_api = WikipediaApi.WikipediaApi()
+    wiki_api = api()
     link_total = 0
     for i in range(samples):
         links = len(wiki_api.get_random_text_and_links()[1])
@@ -16,4 +17,4 @@ def determine_branching_factor(samples):
 
 
 if __name__ == "__main__":
-    print(determine_branching_factor(10))
+    print(determine_branching_factor(1000, WikipediaApi.WikipediaApi))

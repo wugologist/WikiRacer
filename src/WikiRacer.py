@@ -59,9 +59,8 @@ def initialize_logger(arguments):
 
 
 def run_search(arguments):
-
     try:
-        heuristic = get_valid_heuristics()[arguments.heuristic]
+        heuristic = get_valid_heuristics()[arguments.heuristic]()
     except KeyError:
         log.error("{} is not a valid heuristic. Options: {}".format(arguments.heuristic,
                                                                     list(get_valid_heuristics().keys())))
@@ -70,7 +69,7 @@ def run_search(arguments):
     api = WikipediaApi.WikipediaApi()
     start = api.get_canonical_name(arguments.start)
     goal = api.get_canonical_name(arguments.goal)
-    HeuristicTester.HeuristicTester.compare_heuristics(start, goal, [heuristic()])
+    HeuristicTester.HeuristicTester.compare_heuristics(start, goal, [heuristic])
 
 
 if __name__ == "__main__":
