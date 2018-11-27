@@ -216,7 +216,7 @@ class LocalWikipediaApi(IWikiApi):
 
         Returns a list of the variants
         """
-        return [title.upper(), title.lower(), title.title(), titlecase(title)]
+        return [titlecase(title), title.title(), title.lower(), title.upper()]
 
     def get_canonical_name(self, title, try_naming_variants=True):
         """
