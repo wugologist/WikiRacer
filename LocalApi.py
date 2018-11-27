@@ -200,7 +200,8 @@ class LocalWikipediaApi(IWikiApi):
         """
         parsed = self.get_parsed_page(self.get_canonical_name(title))
         text = parsed.strip_code()
-        links = parsed.ifilter_wikilinks(recursive=True)
+        # Exclude any links which would result in an empty target
+        links = parsed.ifilter_wikilinks(recursive=True, matches=lambda node: node.title.strip_code().split("#")[0].strip() != "")
         unique_links = set([link.title.strip_code().split("#")[0] for link in links])
         return text, unique_links
 
@@ -209,14 +210,15 @@ class LocalWikipediaApi(IWikiApi):
         Get potential variants for a title
 
         Eg, on input: A joUrNey tO WonderLAND
-        - uppercase: A JOURNEY TO WONDERLAND
-        - lowercase: a journey to wonderland
-        - naive titlecase: A Journey To Wonderland
+        - capitalcase: A journey to wonderland
         - accurate titlecase: A Journey to Wonderland
+        - naive titlecase: A Journey To Wonderland
+        - lowercase: a journey to wonderland
+        - uppercase: A JOURNEY TO WONDERLAND
 
         Returns a list of the variants
         """
-        return [titlecase(title), title.title(), title.lower(), title.upper()]
+        return [title.capitalize(), titlecase(title), title.title(), title.lower(), title.upper()]
 
     def get_canonical_name(self, title, try_naming_variants=True):
         """
@@ -262,6 +264,11 @@ if __name__ == "__main__":
     print("Loading the index...")
     api.load()
     print("Done loading!")
+    print("Validness of \"programming language\" is:", api.is_valid_article("programming language"))
+    links = api.get_text_and_links("programming language")[1]
+    print("Links of \"programming language\" are:", links)
+    for link in links:
+        print("Validness of link \"{}\" is:".format(link), api.is_valid_article(link))
     print("Canonical name of \"uK\" is:", api.get_canonical_name("uK"))
     print("Canonical name of \"bat\" is:", api.get_canonical_name("bat"))
     print("Text and links of \"uK\" is:", api.get_text_and_links("uK"))
