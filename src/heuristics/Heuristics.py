@@ -6,7 +6,7 @@ class AbstractHeuristic(abc.ABC):
     An abstract heuristic class. All heuristic classes should inherit this class.
     """
 
-    def setup(self, start, goal):
+    def setup(self, api, start, goal):
         """
         Called when the search is started. Put any preprocessing or setup here.
         """
@@ -42,7 +42,7 @@ class BfsHeuristic(AbstractHeuristic):
     def __init__(self):
         self.goal = None
 
-    def setup(self, start, goal):
+    def setup(self, api, start, goal):
         self.goal = goal
 
     def calculate_heuristic(self, node):
@@ -53,7 +53,7 @@ class DfsHeuristic(AbstractHeuristic):
     def __init__(self):
         self.goal = None
 
-    def setup(self, start, goal):
+    def setup(self, api, start, goal):
         self.goal = goal
 
     def calculate_heuristic(self, node):
