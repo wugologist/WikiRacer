@@ -11,7 +11,7 @@ import Heuristics
 from WikipediaApi import WikipediaApi
 from LocalApi import LocalWikipediaApi as LocalApi
 
-APIs = {
+apis = {
     "WikipediaApi": WikipediaApi,
     "LocalApi": LocalApi
 }
@@ -22,18 +22,18 @@ def getValidHeuristics():
     return list(filter(lambda x: x[0] != "_", dir(Heuristics))) # filter out dunder methods
 
 def getValidAPIs():
-    return APIs.keys()
+    return apis.keys()
 
 def parse(argv):
     parser = argparse.ArgumentParser(description="Find a path between Wikipedia pages with the given heuristic",
                                      prog=argv[0])
     parser.add_argument("start", help="The starting article name")
     parser.add_argument("goal", help="The goal page name")
-    parser.add_argument("--heuristic", help="The heuristic function to use. One of {}".format(getValidHeuristics()), required=True)
+    parser.add_argument("--heuristic", help="The heuristic function to use. One of {}".format(getValidHeuristics()), choices=getValidHeuristics(), required=True)
     parser.add_argument("--quiet", "-q", help="Create fewer log messages", action="count")
     parser.add_argument("--no-console", help="Disable console logging", action="store_true")
     parser.add_argument("--no-file", help="Disable file logging", action="store_true")
-    parser.add_argument("--api", help="The api to use. One of {}".format(getValidAPIs()), default="WikipediaApi")
+    parser.add_argument("--api", help="The api to use. One of {}".format(getValidAPIs()), choices=getValidAPIs(), default="WikipediaApi")
     parser.add_argument("--local-bz", help="The path to the *-multistream.xml.bz file from the wikipedia dump")
     parser.add_argument("--local-index", help="The path to the *-index.txt file from the wikipedia dump")
 
@@ -68,7 +68,7 @@ def initialize_api(arguments):
             raise ValueError("Cannot construct LocalApi")
         api = LocalApi(arguments.local_index, arguments.local_bz)
     else:
-        api = APIs[arguments.api]() if arguments.api in APIs else None
+        api = apis[arguments.api]() if arguments.api in apis else None
 
         if api is None:
             log.error("{} is not a valid api. Options: {}".format(arguments.api, getValidAPIs()))

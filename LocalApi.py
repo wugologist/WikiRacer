@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import random
 import logging
 import bz2
@@ -27,7 +29,7 @@ class WikipediaIndexFile:
         self.index_file = index_file
         self.xml_file_size = xml_file_size
         self.articles = {}
-        self.article_titles = []
+        self.article_titles = set()
 
     def manual_load(self):
         """
@@ -69,7 +71,7 @@ class WikipediaIndexFile:
             with open("articles.pickle.tmp", "wb") as articles_pickle_file:
                 log.debug("Saving articles as a pickled dump to speed up future loads")
                 pickle.dump(self.articles, articles_pickle_file)
-        self.article_titles = list(self.articles.keys())
+        self.article_titles = set(self.articles.keys())
 
     def get_range(self, title):
         """
@@ -89,7 +91,7 @@ class WikipediaIndexFile:
         """
         Return a random title from the list of articles
         """
-        return random.choice(self.article_titles)
+        return random.choice(list(self.article_titles))
 
 class LocalWikipediaApi(IWikiApi):
     def __init__(self, index_file, bz_xml_file):
@@ -109,7 +111,7 @@ class LocalWikipediaApi(IWikiApi):
         Load the XML chunk from the bz_xml_file based on the indexes in the index file.
         Returns the text of the chunk.
         """
-        (start, end) = self.index_file.get_range(title)
+        start, end = self.index_file.get_range(title)
         length = end - start
         with open(self.bz_xml_file, "rb") as bz_xml_file:
             bz_xml_file.seek(start)
@@ -248,3 +250,20 @@ class LocalWikipediaApi(IWikiApi):
                         continue
             raise IOError("{} not a valid page title".format(title))
 
+if __name__ == "__main__":
+    """
+    For testing purposes, this file can be called with the arguments PATH_TO_INDEX and PATH_TO_XML_BZ2.
+    This file will then run a short demo of the methods.
+    """
+    import sys
+    path_to_index = sys.argv[1]
+    path_to_xml_bz2 = sys.argv[2]
+    api = LocalWikipediaApi(path_to_index, path_to_xml_bz2)
+    print("Loading the index...")
+    api.load()
+    print("Done loading!")
+    print("Canonical name of \"uK\" is:", api.get_canonical_name("uK"))
+    print("Canonical name of \"bat\" is:", api.get_canonical_name("bat"))
+    print("Text and links of \"uK\" is:", api.get_text_and_links("uK"))
+    print("Here are a few random page titles:", api.get_random_page(), api.get_random_page(), api.get_random_page())
+    print("Get summaries of [\"A\", \"B\", \"Water\"] returns:", api.get_summaries(["A", "B", "Water"]))
