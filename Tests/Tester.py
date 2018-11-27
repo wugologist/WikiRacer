@@ -19,7 +19,8 @@ def run_tests():
                 tests.append((parts[0], parts[1]))
 
     with open(results_file_path, "w") as results_file:
-        results_file.write("start\tgoal\theuristic\ttime_seconds\tnodes_expanded\tpath_length\tpath\n")
+        results_file.write(
+            "\t".join(["start", "goal", "heuristic", "time_seconds", "nodes_expanded", "path_length", "path"]) + "\n")
 
         for test in tests:
             start, goal = test
