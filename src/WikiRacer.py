@@ -5,9 +5,10 @@ import datetime
 import logging
 import os
 import sys
+
 import HeuristicTester
-from apis.WikipediaApi import WikipediaApi
 from apis.LocalApi import LocalWikipediaApi as LocalApi
+from apis.WikipediaApi import WikipediaApi
 from heuristics import Heuristics, TFIDF
 
 apis = {
@@ -17,6 +18,7 @@ apis = {
 
 log = logging.getLogger(__name__)
 
+
 def get_valid_heuristics():
     return {
         "bfs": Heuristics.BfsHeuristic,
@@ -25,8 +27,10 @@ def get_valid_heuristics():
         "tfidf": TFIDF.TfidfHeuristic
     }
 
-def getValidAPIs():
+
+def get_valid_apis():
     return apis.keys()
+
 
 def parse(argv):
     parser = argparse.ArgumentParser(description="Find a path between Wikipedia pages with the given heuristic",
@@ -40,7 +44,8 @@ def parse(argv):
     parser.add_argument("--quiet", "-q", help="Create fewer log messages", action="count")
     parser.add_argument("--no-console", help="Disable console logging", action="store_true")
     parser.add_argument("--no-file", help="Disable file logging", action="store_true")
-    parser.add_argument("--api", help="The api to use. One of {}".format(getValidAPIs()), choices=getValidAPIs(), default="WikipediaApi")
+    parser.add_argument("--api", help="The api to use. One of {}".format(get_valid_apis()), choices=get_valid_apis(),
+                        default="WikipediaApi")
     parser.add_argument("--local-bz", help="The path to the *-multistream.xml.bz file from the wikipedia dump")
     parser.add_argument("--local-index", help="The path to the *-index.txt file from the wikipedia dump")
 
@@ -68,6 +73,7 @@ def initialize_logger(arguments):
         level=level,
         handlers=handlers)
 
+
 def initialize_api(arguments):
     if arguments.api == "LocalApi":
         if not arguments.local_index or not arguments.local_bz:
@@ -78,10 +84,11 @@ def initialize_api(arguments):
         api = apis[arguments.api]() if arguments.api in apis else None
 
         if api is None:
-            log.error("{} is not a valid api. Options: {}".format(arguments.api, getValidAPIs()))
+            log.error("{} is not a valid api. Options: {}".format(arguments.api, get_valid_apis()))
             raise ValueError("Invalid api")
     api.load()
     return api
+
 
 def run_search(arguments):
     try:
@@ -96,6 +103,7 @@ def run_search(arguments):
     start = api.get_canonical_name(arguments.start)
     goal = api.get_canonical_name(arguments.goal)
     HeuristicTester.HeuristicTester.compare_heuristics(start, goal, api, [heuristic])
+
 
 if __name__ == "__main__":
     args = parse(sys.argv)
