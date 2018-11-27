@@ -3,6 +3,7 @@ import pprint
 import time
 
 from src import WikiAgent
+from typing import List
 from src.heuristics.Heuristics import *
 
 log = logging.getLogger(__name__)
@@ -10,12 +11,12 @@ log = logging.getLogger(__name__)
 
 class HeuristicTester:
     @staticmethod
-    def compare_heuristics(start, stop, *args):
+    def compare_heuristics(start, stop, heuristics: List[AbstractHeuristic]):
         agent = WikiAgent.WikiAgent()
         results = []
-        for heuristic in args:
+        for heuristic in heuristics:
             log.info("Testing heuristic {} with start {} and end {}"
-                     .format(heuristic.__name__, start, stop))
+                     .format(type(heuristic).__name__, start, stop))
             start_time = time.time()
             path, expanded_count = agent.search(start, stop, heuristic)
             search_time = time.time() - start_time
@@ -26,7 +27,7 @@ class HeuristicTester:
                              path if len(path) < 10 else path[0:5] + ["..."] + path[-5:]))
             results.append(
                 {
-                    "heuristic": heuristic.__name__,
+                    "heuristic": type(heuristic).__name__,
                     "time_seconds": search_time,
                     "path_length": len(path),
                     "nodes_expanded": expanded_count,
@@ -38,11 +39,14 @@ class HeuristicTester:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+
     results = HeuristicTester.compare_heuristics(
         "Fraser_Canyon_Gold_Rush",
         "British_Empire",
-        bfs_heuristic,
-        shortcut_bfs_heuristic,
-        # null_heuristic  # takes a long time
+        [
+            DfsHeuristic(),
+            BfsHeuristic()
+        ]
     )
     pprint.pprint(results)

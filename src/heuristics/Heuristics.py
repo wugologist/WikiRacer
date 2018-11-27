@@ -1,46 +1,60 @@
-from src import WikipediaApi
-from src.heuristics import TFIDF
+import abc
 
 
-def null_heuristic(node, start, goal, content, neighbors):
-    return 0
+class AbstractHeuristic(abc.ABC):
+    """
+    An abstract heuristic class. All heuristic classes should inherit this class.
+    """
+
+    def setup(self, start, goal):
+        """
+        Called when the search is started. Put any preprocessing or setup here.
+        """
+        pass
+
+    def preprocess_neighbors(self, neighbors):
+        """
+        Called when the neighbors of a node are found. Can do bulk/parallel processing here.
+        :param neighbors: A list of neighbor nodes
+        """
+        pass
+
+    @abc.abstractmethod
+    def calculate_heuristic(self, node):
+        """
+        Calculate the heuristic value for a node
+        :param node: The name of the node
+        :param content: Any data for the node (e.g. text)
+        :return: An integer. Lower heuristic values should be closer to the goal node.
+        """
+        pass
 
 
-def bfs_heuristic(node, start, goal, content, neighbors):
-    return 1
+# Some trivial heuristics #
 
 
-def shortcut_bfs_heuristic(node, start, goal, content, neighbors):
-    return -float("inf") if node == goal else 1
+class NullHeuristic(AbstractHeuristic):
+    def calculate_heuristic(self, node):
+        return 0
 
 
-def dfs_heuristic(node, start, goal, content, neighbors):
-    return -1
+class BfsHeuristic(AbstractHeuristic):
+    def __init__(self):
+        self.goal = None
+
+    def setup(self, start, goal):
+        self.goal = goal
+
+    def calculate_heuristic(self, node):
+        return -float("inf") if node == self.goal else 1
 
 
-def shortcut_dfs_heuristic(node, start, goal, content, neighbors):
-    return -float("inf") if node == goal else -1
+class DfsHeuristic(AbstractHeuristic):
+    def __init__(self):
+        self.goal = None
 
+    def setup(self, start, goal):
+        self.goal = goal
 
-def tfidf_heuristic(node, start, goal, content, neighbors):
-    return Tfidf.get_instance(goal, "corpera/1000.txt").get_heuristic_value(node)
-
-
-class Tfidf:
-    instance = None
-
-    def __init__(self, goal, corpus_filename):
-        self.tfidf = TFIDF.Tfidf(corpus_filename)
-        goal_text = WikipediaApi.WikipediaApi().get_text_and_links(goal)[0]
-        self.goal_transform = self.tfidf.get_transform(goal_text)
-
-    @staticmethod
-    def get_instance(goal, corpus_filename):
-        if Tfidf.instance is None:
-            instance = Tfidf(goal, corpus_filename)
-        return instance
-
-    def get_heuristic_value(self, node):
-        node_text = WikipediaApi.WikipediaApi().get_text_and_links(node)[0]
-        node_transform = self.tfidf.get_transform(node_text)
-        return self.tfidf.compare_transforms(node_transform, self.goal_transform)
+    def calculate_heuristic(self, node):
+        return -float("inf") if node == self.goal else -1

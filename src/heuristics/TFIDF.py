@@ -4,6 +4,9 @@ import nltk
 from nltk.stem.porter import PorterStemmer
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+from src import WikipediaApi
+from src.heuristics.Heuristics import AbstractHeuristic
+
 
 class Tfidf:
     def __init__(self, corpus_filename):
@@ -41,6 +44,24 @@ class Tfidf:
         t2_terms = {t[0] for t in self.extract_top_terms(transform2, 20)}
 
         return 1 - len((t1_terms.intersection(t2_terms))) / len(t1_terms)
+
+
+class TfidfHeuristic(AbstractHeuristic):
+    def __init__(self):
+        self.tfidf = None
+        self.goal_transform = None
+        self.corpus_filename = "../../corpera/1000.txt"  # TODO don't hard code this
+
+    def setup(self, start, goal):
+        self.tfidf = Tfidf(self.corpus_filename)
+        goal_text = WikipediaApi.WikipediaApi().get_text_and_links(goal)[0]
+        self.goal_transform = self.tfidf.get_transform(goal_text)
+
+    # TODO this doesn't really work
+    def calculate_heuristic(self, node):
+        node_text = WikipediaApi.WikipediaApi().get_text_and_links(node)[0]
+        node_transform = self.tfidf.get_transform(node_text)
+        return self.tfidf.compare_transforms(node_transform, self.goal_transform)
 
 
 if __name__ == "__main__":
