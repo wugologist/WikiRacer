@@ -135,7 +135,7 @@ class LocalWikipediaApi(IWikiApi):
                 correctPage = page
 
         # Return the text of the correct page
-        return correctPage.find("./revision/text").text
+        return correctPage.find("./revision/text").text or ""
 
     def get_parsed_page(self, title):
         """
@@ -268,9 +268,9 @@ if __name__ == "__main__":
     api.load()
     print("Done loading!")
     print("Canonical name of \"programming language\" is:", api.get_canonical_name("programming language"))
-    print("Validness of \"Sybra_fuscotriangularis\" is:", api.is_valid_article("Sybra_fuscotriangularis"))
-    links = api.get_text_and_links("programming language")[1]
-    print("Links of \"programming language\" are:", links)
+    print("Validness of \"Mona Singh\" is:", api.is_valid_article("Mona Singh"))
+    links = api.get_text_and_links("Mona Singh")[1]
+    print("Links of \"Mona Singh\" are:", links)
     for link in links:
         print("Validness of link \"{}\" is:".format(link), api.is_valid_article(link))
     print("Canonical name of \"uK\" is:", api.get_canonical_name("uK"))
