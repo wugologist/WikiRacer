@@ -1,6 +1,7 @@
 .idea/
 __pycache__/
 logs/
+corpera/
 **.pyc
 data/
 articles.pickle.tmp

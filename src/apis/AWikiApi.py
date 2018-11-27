@@ -1,6 +1,9 @@
-class IWikiApi:
+import abc
+
+
+class AWikiApi(abc.ABC):
     """
-    Interface for Wikipedia APIs
+    Abstract Class for Wikipedia APIs
     """
 
     def load(self):
@@ -39,6 +42,7 @@ class IWikiApi:
         """
         raise Error("Method not implemented")
 
+    @abc.abstractmethod
     def get_text_and_links(self, title):
         """
         Return a tuple of (article text, link targets)
@@ -47,6 +51,7 @@ class IWikiApi:
         """
         raise Error("Method not implemented")
 
+    @abc.abstractmethod
     def get_canonical_name(self, title):
         """
         Get the official name of an article. Useful because we just check string equality for the goal test,

@@ -3,7 +3,7 @@ import logging
 from queue import Queue
 from threading import Thread
 from time import time
-from IWikiApi import IWikiApi
+from .AWikiApi import AWikiApi
 
 import requests
 from bs4 import BeautifulSoup
@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)  # Don't want these requests filling the logs
 
 
-class WikipediaApi(IWikiApi):
+class WikipediaApi(AWikiApi):
     def __init__(self):
         self.api_root = "https://en.wikipedia.org/api/rest_v1/"
         self.headers = {'User-Agent': 'wong.mich@husky.neu.edu'}  # Wikipedia asks to provide contact info in user agent
@@ -47,13 +47,20 @@ class WikipediaApi(IWikiApi):
         return summaries
 
     def get_text_and_links(self, title):
-        r = self.get_page(title)
-        response = BeautifulSoup(r.text, 'html.parser')
+        return self.extract_text_and_links(self.get_page(title))
+
+    def get_random_text_and_links(self):
+        return self.extract_text_and_links(self.get_random_page())
+
+    @staticmethod
+    def extract_text_and_links(page):
+        response = BeautifulSoup(page.text, 'html.parser')
         links = response.find_all('a')
         unique_links = set([link["href"].split("/")[-1].split("#")[0]
                             for link in links
                             if link.parent.name == "p" and link.class_ != "new"])  # ignore links to nonexistent pages
-        return response.text, unique_links
+        parsed_text = " ".join(map(lambda x: x.text, response.find_all("p")))
+        return parsed_text, unique_links
 
     def get_canonical_name(self, title):
         """

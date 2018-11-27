@@ -1,11 +1,13 @@
 import logging
 from queue import PriorityQueue
 
+from heuristics.Heuristics import AbstractHeuristic
+
 log = logging.getLogger(__name__)
 
 
 class Search:
-    def __init__(self, api, heuristic):
+    def __init__(self, api, heuristic: AbstractHeuristic):
         self.api = api
         self.heuristic = heuristic
 
@@ -13,6 +15,8 @@ class Search:
         nodes_expanded = 0
         priority_queue = PriorityQueue()
         visited = set()
+        # set up heuristic
+        self.heuristic.setup(self.api, start, goal)
         # items in the queue are (cost, path, data) tuples
         priority_queue.put((0, [start], start))
         while not priority_queue.empty():
@@ -29,9 +33,11 @@ class Search:
             log.debug("Got {} neighbors for {}: {}".format(len(neighbors),
                                                            node,
                                                            path if len(path) < 10 else path[0:5] + ["..."] + path[-5:]))
+            # do any bulk preprocessing of neighbor nodes
+            self.heuristic.preprocess_neighbors(neighbors)
             for neighbor in neighbors:
                 if neighbor not in visited:
-                    heuristic = self.heuristic(neighbor, start, goal, content, neighbors)
-                    priority_queue.put((cost + heuristic, path + [neighbor], neighbor))
-        log.warning("No path found!")
+                    heuristic_value = self.heuristic.calculate_heuristic(neighbor)
+                    priority_queue.put((cost + heuristic_value, path + [neighbor], neighbor))
+        log.warning("No path found between {}  and {}!".format(start, goal))
         return [], nodes_expanded  # no path found

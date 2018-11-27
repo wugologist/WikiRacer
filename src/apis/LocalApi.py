@@ -9,7 +9,7 @@ import xml.etree.ElementTree as xml
 import mwparserfromhell
 from titlecase import titlecase
 from os.path import getsize
-from IWikiApi import IWikiApi
+from .AWikiApi import AWikiApi
 
 log = logging.getLogger(__name__)
 
@@ -93,7 +93,7 @@ class WikipediaIndexFile:
         """
         return random.choice(list(self.article_titles))
 
-class LocalWikipediaApi(IWikiApi):
+class LocalWikipediaApi(AWikiApi):
     def __init__(self, index_file, bz_xml_file):
         self.index_file = WikipediaIndexFile(index_file, getsize(bz_xml_file))
         self.bz_xml_file = bz_xml_file
