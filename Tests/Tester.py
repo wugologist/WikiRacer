@@ -12,9 +12,9 @@ heuristics = [Heuristics.BfsHeuristic, Heuristics.DfsHeuristic]
 def run_tests():
     tests = []
 
-    with open(test_file_path) as test_file:
+    with open(test_file_path, "r") as test_file:
         for line in test_file:
-            if line[0] != '#':
+            if not line.startswith("#"):
                 parts = line.rstrip().split("|")
                 tests.append((parts[0], parts[1]))
 
