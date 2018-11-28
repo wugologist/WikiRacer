@@ -37,8 +37,9 @@ def run_one_test(start, goal):
     res = HeuristicTester.HeuristicTester.compare_heuristics(start, goal, api, heuristics)
     ans_list = []
     for r in res:
-        ans_list.append(
-            [start, goal, r["heuristic"], str(r["time_seconds"]), str(r["nodes_expanded"]), str(r["path_length"]), str(r["path"])])
+        row = [start, goal, r["heuristic"], r["time_seconds"], r["nodes_expanded"], r["path_length"], r["path"]]
+        row = map(str, row)
+        ans_list.append(row)
     return ans_list
 
 
