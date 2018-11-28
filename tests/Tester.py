@@ -7,6 +7,7 @@ from src.heuristics import Heuristics
 test_file_path = "tests.txt"
 results_file_path = "results.tsv"
 
+api = WikipediaApi.WikipediaApi
 heuristics = [Heuristics.BfsHeuristic, Heuristics.DfsHeuristic]
 
 
@@ -28,7 +29,7 @@ def run_tests():
 
 
 def run_one_test(start, goal):
-    res = HeuristicTester.HeuristicTester.compare_heuristics(start, goal, WikipediaApi.WikipediaApi, heuristics)
+    res = HeuristicTester.HeuristicTester.compare_heuristics(start, goal, api, heuristics)
     ans_list = []
     for r in res:
         ans_list.append(
