@@ -1,5 +1,4 @@
-import datetime
-
+import csv
 from src import HeuristicTester
 from src.heuristics import Heuristics
 
@@ -18,26 +17,21 @@ def run_tests():
                 parts = line.rstrip().split("|")
                 tests.append((parts[0], parts[1]))
 
-    with open(results_file_path, "w") as results_file:
-        results_file.write(
-            "\t".join(["start", "goal", "heuristic", "time_seconds", "nodes_expanded", "path_length", "path"]) + "\n")
-
+    with open('results.tsv', 'w', newline='') as f:
+        writer = csv.writer(f, delimiter='\t',)
+        writer.writerow(["start", "goal", "heuristic", "time_seconds", "nodes_expanded", "path_length", "path"])
         for test in tests:
             start, goal = test
-            # results_file.write("Start: " + start + ", Goal: " + goal + "\n")
-            results_file.writelines(run_one_test(start, goal))
-            # results_file.write("\n")
-        results_file.write(str(datetime.datetime.now()))  # do we want a timestamp? where should it go?
-
-
+            writer.writerows(run_one_test(start, goal))
 
 
 def run_one_test(start, goal):
     res = HeuristicTester.HeuristicTester.compare_heuristics(start, goal, heuristics)
     ans_list = []
     for r in res:
-        line = [start, goal, r["heuristic"], str(r["time_seconds"]), str(r["nodes_expanded"]), str(r["path_length"]), str(r["path"])]
-        ans_list.append("\t".join(line) + "\n")
+        ans_list.append(
+            [start, goal, r["heuristic"], str(r["time_seconds"]), str(r["nodes_expanded"]), str(r["path_length"]),
+             str(r["path"])])
     return ans_list
 
 
