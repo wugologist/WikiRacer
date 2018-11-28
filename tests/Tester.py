@@ -7,8 +7,8 @@ from src.heuristics import Heuristics
 test_file_path = "tests.txt"
 results_file_path = "results.tsv"
 
-api = WikipediaApi.WikipediaApi
-heuristics = [Heuristics.BfsHeuristic, Heuristics.DfsHeuristic]
+api = WikipediaApi.WikipediaApi()
+heuristics = [Heuristics.BfsHeuristic(), Heuristics.DfsHeuristic()]
 
 
 def run_tests():

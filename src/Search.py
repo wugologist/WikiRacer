@@ -8,8 +8,8 @@ log = logging.getLogger(__name__)
 
 class Search:
     def __init__(self, api, heuristic: AbstractHeuristic):
-        self.api = api()
-        self.heuristic = heuristic()
+        self.api = api
+        self.heuristic = heuristic
 
     def a_star(self, start, goal):
         nodes_expanded = 0
