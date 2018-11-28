@@ -3,5 +3,6 @@ __pycache__/
 logs/
 corpera/
 **.pyc
+results/
 data/
 articles.pickle.tmp
