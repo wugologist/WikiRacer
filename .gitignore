@@ -4,3 +4,6 @@ logs/
 corpera/
 **.pyc
 Tests/results.*
+
+data/
+articles.pickle.tmp

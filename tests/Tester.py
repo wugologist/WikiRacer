@@ -1,4 +1,6 @@
 import csv
+
+from apis import WikipediaApi
 from src import HeuristicTester
 from src.heuristics import Heuristics
 
@@ -26,7 +28,7 @@ def run_tests():
 
 
 def run_one_test(start, goal):
-    res = HeuristicTester.HeuristicTester.compare_heuristics(start, goal, heuristics)
+    res = HeuristicTester.HeuristicTester.compare_heuristics(start, goal, WikipediaApi.WikipediaApi, heuristics)
     ans_list = []
     for r in res:
         ans_list.append(

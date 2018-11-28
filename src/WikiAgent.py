@@ -1,11 +1,10 @@
-from src import WikipediaApi, Search
-
+import Search
 
 class WikiAgent:
-    def __init__(self):
-        self.wikipedia_api = WikipediaApi.WikipediaApi()
+    def __init__(self, api):
+        self.api = api
 
     def search(self, start, end, heuristic):
-        search = Search.Search(self.wikipedia_api.get_text_and_links,
+        search = Search.Search(self.api,
                                heuristic)
         return search.a_star(start, end)

@@ -4,8 +4,7 @@ import nltk
 from nltk.stem.porter import PorterStemmer
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from src import WikipediaApi
-from src.heuristics.Heuristics import AbstractHeuristic
+from .Heuristics import AbstractHeuristic
 
 
 class Tfidf:
@@ -52,14 +51,15 @@ class TfidfHeuristic(AbstractHeuristic):
         self.goal_transform = None
         self.corpus_filename = "../../corpera/1000.txt"  # TODO don't hard code this
 
-    def setup(self, start, goal):
+    def setup(self, api, start, goal):
+        self.api = api
         self.tfidf = Tfidf(self.corpus_filename)
-        goal_text = WikipediaApi.WikipediaApi().get_text_and_links(goal)[0]
+        goal_text = self.api.get_text_and_links(goal)[0]
         self.goal_transform = self.tfidf.get_transform(goal_text)
 
     # TODO this doesn't really work
     def calculate_heuristic(self, node):
-        node_text = WikipediaApi.WikipediaApi().get_text_and_links(node)[0]
+        node_text = self.api.get_text_and_links(node)[0]
         node_transform = self.tfidf.get_transform(node_text)
         return self.tfidf.compare_transforms(node_transform, self.goal_transform)
 
