@@ -3,7 +3,6 @@ __pycache__/
 logs/
 corpera/
 **.pyc
-Tests/results.*
-
+results/
 data/
 articles.pickle.tmp

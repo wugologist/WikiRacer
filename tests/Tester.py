@@ -1,11 +1,12 @@
 import csv
+import datetime
+import os
 
 from apis import WikipediaApi
 from src import HeuristicTester
 from src.heuristics import Heuristics
 
 test_file_path = "tests.txt"
-results_file_path = "results.tsv"
 
 api = WikipediaApi.WikipediaApi()
 heuristics = [Heuristics.BfsHeuristic(), Heuristics.DfsHeuristic()]
@@ -20,7 +21,11 @@ def run_tests():
                 parts = line.rstrip().split("|")
                 tests.append((parts[0], parts[1]))
 
-    with open('results.tsv', 'w', newline='') as f:
+    if not os.path.exists("../results/"):
+        os.makedirs("../results/")
+    results_file_path = "../results/{}.tsv".format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+
+    with open(results_file_path, 'w', newline='') as f:
         writer = csv.writer(f, delimiter='\t',)
         writer.writerow(["start", "goal", "heuristic", "time_seconds", "nodes_expanded", "path_length", "path"])
         for test in tests:
@@ -33,8 +38,7 @@ def run_one_test(start, goal):
     ans_list = []
     for r in res:
         ans_list.append(
-            [start, goal, r["heuristic"], str(r["time_seconds"]), str(r["nodes_expanded"]), str(r["path_length"]),
-             str(r["path"])])
+            [start, goal, r["heuristic"], str(r["time_seconds"]), str(r["nodes_expanded"]), str(r["path_length"]), str(r["path"])])
     return ans_list
 
 
