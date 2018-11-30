@@ -4,3 +4,5 @@ mwparserfromhell
 titlecase
 nltk
 sklearn
+sqlalchemy
+mysqlclient
