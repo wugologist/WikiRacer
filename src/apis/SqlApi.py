@@ -5,7 +5,7 @@ import sqlalchemy
 from sqlalchemy.sql import text
 import mwparserfromhell
 from titlecase import titlecase
-from AWikiApi import AWikiApi
+from .AWikiApi import AWikiApi
 import itertools
 
 # This is ORM stuff that I was trying to work on, but then I realized it's 
@@ -60,10 +60,12 @@ class SqlWikipediaApi(AWikiApi):
         """
         Get the wikitext for a given page
         """
-        statement = text("""SELECT text.old_text FROM text
+        statement = text("""SELECT text.old_text
+                              FROM text
                               JOIN revision ON revision.rev_text_id = text.old_id
                               JOIN page ON page.page_latest = revision.rev_id 
-                              WHERE page.page_title = :title""")
+                              WHERE page.page_namespace = 0
+                              AND page.page_title = :title""")
         response = self.connection.execute(statement, title=title).fetchone()
         return (response and response[0].decode("utf-8")) or ""
 
@@ -110,7 +112,9 @@ class SqlWikipediaApi(AWikiApi):
 
         # ORDER BY RAND() is not a good way to do this, but there isn't anything else really quick to implement.
         # FIXME, This is slow, but we can fix it later if we really need it optimized.
-        statement = text("""SELECT page.page_title FROM page
+        statement = text("""SELECT page.page_title
+                              FROM page
+                              WHERE page.page_namespace = 0
                               ORDER BY RAND()
                               LIMIT 1""")
         return self.connection.execute(statement).fetchone()[0]
