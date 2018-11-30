@@ -46,67 +46,66 @@ class Tfidf:
     @staticmethod
     def tokenize(text):
         tokens = nltk.word_tokenize(text)
+        stemmer = PorterStemmer()
         stems = []
         for item in tokens:
-            stems.append(PorterStemmer().stem(item))
+            stems.append(stemmer.stem(item))
         return stems
 
     def get_transform(self, document):
         return self.model.transform([document])
 
     def extract_top_terms(self, transform, limit=None):
-        # transform = self.get_transform(document)
         feature_names = self.model.get_feature_names()
         terms = [(feature_names[term], transform[0, term]) for term in transform.nonzero()[1]]
         sorted_terms = sorted(terms, key=lambda t: t[1], reverse=True)
         return sorted_terms[:limit + 1] if limit is not None else sorted_terms
 
-    def compare_transforms(self, transform1, transform2):
+    def compare_transforms(self, node_transform, goal_transform, max_terms=5):
         """
         Calculate the similarity between two transform matrices
-        :param transform1:
-        :param transform2:
-        :return: A number in [0, 1] where 0 is a perfect match
         """
-        t1_terms = {t[0] for t in self.extract_top_terms(transform1, 20)}
-        t2_terms = {t[0] for t in self.extract_top_terms(transform2, 20)}
+        goal_terms = self.extract_top_terms(goal_transform, max_terms)
+        feature_names = self.model.get_feature_names()
+        node_features = {feature_names[term]: node_transform[0, term] for term in node_transform.nonzero()[1]}
+        node_words = {feature_names[term] for term in node_transform.nonzero()[1]}
 
-        return 1 - len((t1_terms.intersection(t2_terms))) / len(t1_terms)
+        difference = 0
+        for i, term in enumerate(goal_terms):
+            difference += abs((goal_terms[i][1] - node_features[term[0]]) / (i + 1)) \
+                if term[0] in node_words \
+                else goal_terms[i][1]
+
+        return difference
 
 
 class TfidfHeuristic(AbstractHeuristic):
-    def __init__(self):
+    def __init__(self, corpus_filename, keyword_limit=5):
         self.api = None
         self.tfidf = None
         self.goal_transform = None
-        self.corpus_filename = "../../corpera/1000.txt"  # TODO don't hard code this
+        self.corpus_filename = corpus_filename
+        self.keyword_limit = keyword_limit
+        self.summaries = dict()
 
     def setup(self, api, start, goal):
+        log.info("Initializing TFIDF heuristic")
         self.api = api
         self.tfidf = Tfidf()
         self.tfidf.setup(self.corpus_filename)
-        goal_text = self.api.get_text_and_links(goal)[0]
+        # goal_text = self.api.get_text_and_links(goal)[0]
+        goal_text = self.api.get_summaries([goal])[goal]
         self.goal_transform = self.tfidf.get_transform(goal_text)
+        log.info("Top {} keywords for goal article {}: {}".format(self.keyword_limit,
+                                                                  goal,
+                                                                  self.tfidf.extract_top_terms(self.goal_transform,
+                                                                                               self.keyword_limit)))
 
-    # TODO this doesn't really work
+    def preprocess_neighbors(self, neighbors):
+        self.summaries.update(self.api.get_summaries(neighbors))
+
     def calculate_heuristic(self, node):
-        node_text = self.api.get_text_and_links(node)[0]
+        # node_text = self.api.get_text_and_links(node)[0]
+        node_text = self.summaries[node]
         node_transform = self.tfidf.get_transform(node_text)
         return self.tfidf.compare_transforms(node_transform, self.goal_transform)
-
-
-def test():
-    tfidf = Tfidf()
-    tfidf.setup("../../corpera/100.txt")
-    print("stuff:")
-    t1 = tfidf.get_transform("test document is a test")
-    t2 = tfidf.get_transform("other document is a text")
-    print(tfidf.compare_transforms(t1, t2))
-    print(tfidf.compare_transforms(t1, t1))
-    print(tfidf.compare_transforms(t2, t1))
-    print(tfidf.compare_transforms(t2, t2))
-
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    test()
