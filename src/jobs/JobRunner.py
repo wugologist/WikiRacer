@@ -5,13 +5,15 @@ from typing import Dict
 from jobs.AbstractJob import AbstractJob
 from jobs.CalculateBranchingFactor import CalculateBranchingFactor
 from jobs.GenerateRandomCorpus import GenerateRandomCorpus
+from jobs.TrainDoc2Vec import TrainDoc2Vec
 
 log = logging.getLogger(__name__)
 
 # Register all jobs here
 jobs: Dict[str, AbstractJob] = {
     "CalculateBranchingFactor": CalculateBranchingFactor(),
-    "GenerateRandomCorpus": GenerateRandomCorpus()
+    "GenerateRandomCorpus": GenerateRandomCorpus(),
+    "TrainDoc2Vec": TrainDoc2Vec()
 }
 
 

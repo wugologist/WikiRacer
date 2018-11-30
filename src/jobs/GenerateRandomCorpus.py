@@ -26,11 +26,11 @@ class GenerateRandomCorpus(AbstractJob):
         """
         Create a text file of random Wikipedia summaries
         """
-        corpera_path = "../../corpera/"
+        corpora_path = "../../corpora/"
         if filename is None:
-            if not os.path.isdir(corpera_path):
-                os.makedirs(corpera_path)
-            f = corpera_path + str(count)
+            if not os.path.isdir(corpora_path):
+                os.makedirs(corpora_path)
+            f = corpora_path + str(count)
             if not os.path.isfile(f + ".txt"):
                 filename = f + ".txt"
             else:

@@ -6,3 +6,4 @@ nltk
 sklearn
 sqlalchemy
 mysqlclient
+gensim
