@@ -8,12 +8,14 @@ import sys
 
 import HeuristicTester
 from apis.LocalApi import LocalWikipediaApi as LocalApi
+from apis.SqlApi import SqlWikipediaApi as SqlApi
 from apis.WikipediaApi import WikipediaApi
 from heuristics import Heuristics, TFIDF
 
 apis = {
     "WikipediaApi": WikipediaApi,
-    "LocalApi": LocalApi
+    "LocalApi": LocalApi,
+    "SqlApi": SqlApi
 }
 
 log = logging.getLogger(__name__)
