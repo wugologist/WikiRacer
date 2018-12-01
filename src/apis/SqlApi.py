@@ -8,32 +8,6 @@ from titlecase import titlecase
 from .AWikiApi import AWikiApi
 import itertools
 
-# This is ORM stuff that I was trying to work on, but then I realized it's 
-# probably just better to get this working and do the queries raw for now.
-# I'm leaving it here for now in case we want to revisit it.
-
-# from sqlalchemy import Table, Column, Integer, ForeignKey
-# from sqlalchemy.orm import relationship
-#
-# # Weird SQLAlchemy ORM stuff for using a pre-existing schema
-# Base = sqlalchemy.ext.automap.automap_base()
-# class Page(Base):
-#     __tablename__ = 'page'
-#
-#     page_title = Column('page_title', String)
-#     page_namespace = Column('page_namespace', Integer)
-#     page_is_redirect = Column('page_is_redirect', Boolean)
-#     revision_collection = relationship('')
-#
-# class Revision(Base):
-#     __tablename__ = 'revision'
-#
-# # TODO finish this ORM stuff...
-#
-# In load, after the connection is created:
-#         Base.prepare(self.connection, reflect=True)
-
-
 log = logging.getLogger(__name__)
 
 class SqlWikipediaApi(AWikiApi):
@@ -54,12 +28,16 @@ class SqlWikipediaApi(AWikiApi):
         Will potentially block the main thread for a little under a minute.
         Must be called before using this API.
         """
-        self.connection = sqlalchemy.create_engine('mysql://{}:{}@{}:{}/wiki'.format(self.db_username, self.db_password, self.db_host, self.db_port))
+        self.connection = sqlalchemy.create_engine('mysql://{}:{}@{}:{}/wiki?charset=utf8'.format(self.db_username, self.db_password, self.db_host, self.db_port))
+        self.connection.execute('SET NAMES utf8;')
+        self.connection.execute('SET CHARACTER SET utf8;')
+        self.connection.execute('SET character_set_connection=utf8;')
 
     def get_page_wikitext(self, title):
         """
         Get the wikitext for a given page
         """
+        title = title.replace(" ", "_")
         statement = text("""SELECT text.old_text
                               FROM text
                               JOIN revision ON revision.rev_text_id = text.old_id
