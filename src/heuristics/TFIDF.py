@@ -72,9 +72,9 @@ class Tfidf:
 
         difference = 0
         for i, term in enumerate(goal_terms):
-            difference += abs((goal_terms[i][1] - node_features[term[0]]) / (i + 1)) \
-                if term[0] in node_words \
-                else goal_terms[i][1]
+            difference += abs((goal_terms[i][1] - node_features[term[0]])
+                              if term[0] in node_words
+                              else goal_terms[i][1]) / (i + 1)
 
         return difference
 
@@ -105,7 +105,9 @@ class TfidfHeuristic(AbstractHeuristic):
         self.summaries.update(self.api.get_summaries(neighbors))
 
     def calculate_heuristic(self, node):
-        # node_text = self.api.get_text_and_links(node)[0]
+        if node not in self.summaries:
+            log.warning("Node {} not fetched")
+            return float("inf")
         node_text = self.summaries[node]
         node_transform = self.tfidf.get_transform(node_text)
         return self.tfidf.compare_transforms(node_transform, self.goal_transform)
