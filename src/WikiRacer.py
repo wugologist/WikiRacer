@@ -18,16 +18,18 @@ apis = {
     "SqlApi": SqlApi
 }
 
+heuristics = {
+    "bfs": Heuristics.BfsHeuristic(),
+    "dfs": Heuristics.DfsHeuristic(),
+    "null": Heuristics.NullHeuristic(),
+    "tfidf": TFIDF.TfidfHeuristic("corpera/1000.txt", 10)
+}
+
 log = logging.getLogger(__name__)
 
 
 def get_valid_heuristics():
-    return {
-        "bfs": Heuristics.BfsHeuristic,
-        "dfs": Heuristics.DfsHeuristic,
-        "null": Heuristics.NullHeuristic,
-        "tfidf": TFIDF.TfidfHeuristic
-    }
+    return heuristics
 
 
 def get_valid_apis():
@@ -94,7 +96,7 @@ def initialize_api(arguments):
 
 def run_search(arguments):
     try:
-        heuristic = get_valid_heuristics()[arguments.heuristic]()
+        heuristic = get_valid_heuristics()[arguments.heuristic]
     except KeyError:
         log.error("{} is not a valid heuristic. Options: {}".format(arguments.heuristic,
                                                                     list(get_valid_heuristics().keys())))

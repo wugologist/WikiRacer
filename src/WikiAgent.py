@@ -1,5 +1,6 @@
 import Search
 
+
 class WikiAgent:
     def __init__(self, api):
         self.api = api

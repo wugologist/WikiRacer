@@ -3,10 +3,11 @@ import logging
 from queue import Queue
 from threading import Thread
 from time import time
-from .AWikiApi import AWikiApi
 
 import requests
 from bs4 import BeautifulSoup
+
+from .AWikiApi import AWikiApi
 
 log = logging.getLogger(__name__)
 logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)  # Don't want these requests filling the logs
@@ -56,9 +57,12 @@ class WikipediaApi(AWikiApi):
     def extract_text_and_links(page):
         response = BeautifulSoup(page.text, 'html.parser')
         links = response.find_all('a')
+        # TODO: This link parsing needs to be fixed to get all the links we want and nothing else
         unique_links = set([link["href"].split("/")[-1].split("#")[0]
                             for link in links
-                            if link.parent.name == "p" and link.class_ != "new"])  # ignore links to nonexistent pages
+                            if link["href"].startswith("./")
+                            and ":" not in link["href"]
+                            and "class" not in link.attrs.keys()])  # ignore broken links and other special cases
         parsed_text = " ".join(map(lambda x: x.text, response.find_all("p")))
         return parsed_text, unique_links
 
@@ -99,4 +103,3 @@ class WikipediaApi(AWikiApi):
                             self.cache[title] = summary
                     finally:
                         self.queue.task_done()
-
