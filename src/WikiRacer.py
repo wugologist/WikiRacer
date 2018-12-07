@@ -10,7 +10,7 @@ import HeuristicTester
 from apis.LocalApi import LocalWikipediaApi as LocalApi
 from apis.SqlApi import SqlWikipediaApi as SqlApi
 from apis.WikipediaApi import WikipediaApi
-from heuristics import Heuristics, TFIDF
+from heuristics import Heuristics, TFIDF, Doc2Vec
 
 apis = {
     "WikipediaApi": WikipediaApi,
@@ -22,7 +22,8 @@ heuristics = {
     "bfs": Heuristics.BfsHeuristic(),
     "dfs": Heuristics.DfsHeuristic(),
     "null": Heuristics.NullHeuristic(),
-    "tfidf": TFIDF.TfidfHeuristic("corpera/1000.txt", 10)
+    "tfidf": TFIDF.TfidfHeuristic("corpora/1000.txt", 10),
+    "doc2vec": Doc2Vec.Doc2VecHeuristic(True)
 }
 
 log = logging.getLogger(__name__)

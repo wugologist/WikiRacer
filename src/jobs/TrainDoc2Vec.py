@@ -1,4 +1,5 @@
 import argparse
+import string
 from typing import List
 
 import nltk
@@ -22,14 +23,16 @@ class TrainDoc2Vec(AbstractJob):
         if clean:
             sw = set(stopwords.words('english'))
             cleaned_lines = []
+            stemmer = nltk.PorterStemmer()
             for line in lines:
                 tokens = nltk.word_tokenize(line)
-                cleaned_tokens = [token for token in tokens if token.lower() not in sw]
+                cleaned_tokens = [stemmer.stem(token.lower()) for token in tokens if token.lower() not in sw
+                                  and token not in string.punctuation]
                 cleaned_line = " ".join(cleaned_tokens)
                 cleaned_lines.append(cleaned_line)
             lines = cleaned_lines
         documents = [TaggedDocument(doc, [i]) for i, doc in enumerate(lines)]
-        model = Doc2Vec(documents, vector_size=5, window=2, min_count=1, workers=4)
+        model = Doc2Vec(documents, vector_size=5, window=2, min_count=1, workers=4, epochs=10)
         model.save("../../models/" + model_filename)
         model.delete_temporary_training_data(keep_doctags_vectors=True, keep_inference=True)
 
