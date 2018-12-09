@@ -15,6 +15,7 @@ class Search:
         nodes_expanded = 0
         priority_queue = PriorityQueue()
         visited = set()
+        goal_canonical_name = self.api.get_canonical_name(goal)
         # set up heuristic
         self.heuristic.setup(self.api, start, goal)
         # items in the queue are (cost, path, data) tuples
@@ -24,7 +25,7 @@ class Search:
             if node in visited:
                 continue
             visited.add(node)
-            if node == goal:
+            if self.api.get_canonical_name(node) == goal_canonical_name:
                 return path, nodes_expanded
             if not self.api.is_valid_article(node):
                 continue
@@ -37,7 +38,13 @@ class Search:
             self.heuristic.preprocess_neighbors(neighbors)
             for neighbor in neighbors:
                 if neighbor not in visited:
-                    heuristic_value = self.heuristic.calculate_heuristic(neighbor)
+                    try:
+                        if self.api.get_canonical_name(neighbor) == goal_canonical_name:
+                            heuristic_value = 0
+                        else:
+                            heuristic_value = self.heuristic.calculate_heuristic(neighbor)
+                    except OSError:
+                        heuristic_value = self.heuristic.calculate_heuristic(neighbor)
                     priority_queue.put((cost + heuristic_value, path + [neighbor], neighbor))
         log.warning("No path found between {}  and {}!".format(start, goal))
         return [], nodes_expanded  # no path found
