@@ -25,20 +25,27 @@ class WordNetHeuristic(AbstractHeuristic):
             return []
         return [word_synsets[0]]
 
-    def get_synsets(self, word):
+    def link_exists(self, from_title, to_title):
+        """
+        Using the API, check if a title exists from the from_title article to the to_title article
+        """
+        return to_title in self.api.get_text_and_links(from_title)[1]
+
+    def get_synsets(self, word, allow_neighbors=False, require_symmetric=False):
         """
         Get synsets for a word.
         If the word has a WordNet node, return it's own synsets.
-        If the word doesn't, return all the synsets of it's neighbors.
+        If require_symmetric=True, then ensure that neighbors have a symmetric edge with the article.
         """
         word_synsets = wordnet.synsets(word)
         if word_synsets:
             return [word_synsets[0]]
-        try:
+        if allow_neighbors:
             neighbors = self.api.get_text_and_links(word)[1]
+            if require_symmetric:
+                neighbors = filter(lambda article: self.link_exists(article, self.goal), neighbors)
             return list(flatmap(self.get_first_synset, neighbors))
-        except OSError:
-            return []
+        return []
 
     def setup(self, api, start, goal):
         log.info("Initializing WordNet heuristic")
@@ -47,16 +54,21 @@ class WordNetHeuristic(AbstractHeuristic):
         nltk.download('wordnet')
         self.api = api
         self.goal = goal
-        self.goal_synsets = self.get_synsets(goal)
+        # require_symmetric=True because it's important for synsets that we target
+        # to either be the goal or have a direct link to the goal
+        self.goal_synsets = self.get_synsets(goal, allow_neighbors=True, require_symmetric=True)
         if not self.goal_synsets:
             log.error("Unable to get synsets for goal node! Node: {}".format(goal))
-            raise Error("Goal and all goal's neighbors are not WordNet compatible")
+            raise OSError("Goal and all goal's neighbors are not WordNet compatible")
 
     def calculate_heuristic(self, node):
-        # log.debug("Calculating heuristic for {}".format(node))
+        if node == self.goal:
+            return 0
         node_synsets = self.get_synsets(node)
         if not node_synsets:
-            # log.warn("Unable to get synsets for {}".format(node))
             return float("inf")
         potential_pairs = list(itertools.product(self.goal_synsets, node_synsets))
-        return min(map(lambda pair: 1 - (pair[0].path_similarity(pair[1]) or 0), potential_pairs))
+        # We reserve the heuristic of 0 for the goal, all other heuristics must have a value of at least 0.1
+        # This way, if the goal doesn't have a synset, but we're going to a neighbor of the goal,
+        # that neighbor still has a non-zero value and the true goal is prioritized once we reach the neighbor.
+        return 0.1 + min(map(lambda pair: 1 - (pair[0].path_similarity(pair[1]) or 0), potential_pairs))
