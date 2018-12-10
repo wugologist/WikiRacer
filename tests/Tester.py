@@ -31,7 +31,7 @@ def run_tests():
     log.info("Results will be stored in {}".format(results_file_path))
 
     with open(results_file_path, 'w', newline='') as f:
-        writer = csv.writer(f, delimiter='\t', )
+        writer = csv.writer(f, delimiter='\t')
         writer.writerow(
             ["start", "goal", "heuristic", "greedy" "time_seconds", "nodes_expanded", "path_length", "path"])
         for test in tests:
