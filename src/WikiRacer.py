@@ -45,6 +45,7 @@ def parse(argv):
                         .format(get_valid_heuristics().keys()),
                         choices=get_valid_heuristics(),
                         required=True)
+    parser.add_argument("--greedy", help="Use greedy algorithm instead of A*", action="store_true")
     parser.add_argument("--quiet", "-q", help="Create fewer log messages", action="count")
     parser.add_argument("--no-console", help="Disable console logging", action="store_true")
     parser.add_argument("--no-file", help="Disable file logging", action="store_true")
@@ -106,7 +107,7 @@ def run_search(arguments):
 
     start = api.get_canonical_name(arguments.start)
     goal = api.get_canonical_name(arguments.goal)
-    HeuristicTester.HeuristicTester.compare_heuristics(start, goal, api, [heuristic])
+    HeuristicTester.HeuristicTester.compare_heuristics(start, goal, api, arguments.greedy, [heuristic])
 
 
 if __name__ == "__main__":

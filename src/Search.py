@@ -12,6 +12,12 @@ class Search:
         self.heuristic = heuristic
 
     def a_star(self, start, goal):
+        return self.generic_search(start, goal, True)
+
+    def greedy(self, start, goal):
+        return self.generic_search(start, goal, False)
+
+    def generic_search(self, start, goal, use_cost):
         nodes_expanded = 0
         priority_queue = PriorityQueue()
         visited = set()
@@ -38,6 +44,7 @@ class Search:
             for neighbor in neighbors:
                 if neighbor not in visited:
                     heuristic_value = self.heuristic.calculate_heuristic(neighbor)
-                    priority_queue.put((cost + heuristic_value, path + [neighbor], neighbor))
+                    weight = cost + heuristic_value if use_cost else heuristic_value
+                    priority_queue.put((weight, path + [neighbor], neighbor))
         log.warning("No path found between {}  and {}!".format(start, goal))
         return [], nodes_expanded  # no path found
