@@ -10,6 +10,7 @@ import mwparserfromhell
 from titlecase import titlecase
 from os.path import getsize
 from .AWikiApi import AWikiApi
+import functools
 
 log = logging.getLogger(__name__)
 
@@ -233,7 +234,7 @@ class LocalWikipediaApi(AWikiApi):
         """
         return [title.capitalize(), titlecase(title), title.title(), title.lower(), title.upper()]
 
-    def get_canonical_name(self, title, try_naming_variants=True, blacklist=[]):
+    def get_canonical_name_helper(self, title, try_naming_variants=True, blacklist=[]):
         """
         Get the official name of an article. Useful because we just check string equality for the goal test,
         so we don't want to skip over the goal if e.g. the capitalization is off
@@ -242,11 +243,13 @@ class LocalWikipediaApi(AWikiApi):
         If try_naming_variants is true, attempt to try other capitalizations of the name.
         This should be on most times, but not when we recur during the process of autocapitalization.
 
+        This is the uncached version because it needs to keep track of a blacklist (which can't be cached)
+
         Cases:
         - The article name is correct
             - Use the article title as is
         - The article is a redirection page
-            - Recursively call get_canonical_name on the redirect target
+            - Recursively call get_canonical_name_helper on the redirect target
         - The article doesn't exist
             - Attempt to perform auto capitalization on the title to see if any of those pages exist, in which case recur on them
             - If all fails, return None
@@ -256,16 +259,24 @@ class LocalWikipediaApi(AWikiApi):
             return None
         if self.page_exists(title):
             if self.is_redirect_page(title):
-                return self.get_canonical_name(self.get_redirect_target(title), blacklist=blacklist + [title])
+                return self.get_canonical_name_helper(self.get_redirect_target(title), blacklist=blacklist + [title])
             else:
                 return title
         else:
             if try_naming_variants:
                 for variant in self.get_name_variants(title):
-                    variant_canonical_name = self.get_canonical_name(variant, try_naming_variants=False, blacklist=blacklist + [title]);
+                    variant_canonical_name = self.get_canonical_name_helper(variant, try_naming_variants=False, blacklist=blacklist + [title]);
                     if variant_canonical_name:
                         return variant_canonical_name
             return None
+
+    @functools.lru_cache(maxsize=1024)
+    def get_canonical_name(self, title):
+        """
+        A cacheable version of get_canonical_name_helper.
+        Just defers to get_canonical_name_helper for cache misses.
+        """
+        return self.get_canonical_name_helper(title)
 
 if __name__ == "__main__":
     """
