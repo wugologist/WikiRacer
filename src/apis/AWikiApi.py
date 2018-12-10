@@ -16,14 +16,8 @@ class AWikiApi(abc.ABC):
     def is_valid_article(self, title):
         """
         Return True IFF the page has a canonical name.
-        
-        TODO This should be memoized which would improve performance a ton.
         """
-        try:
-            self.get_canonical_name(title)
-            return True
-        except IOError:
-            return False
+        return self.get_canonical_name(title) is not None
 
     def get_random_page(self):
         """

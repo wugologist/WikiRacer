@@ -199,11 +199,9 @@ class LocalWikipediaApi(AWikiApi):
         """
         canonical_links = set()
         for link in links:
-            try:
-                canonical_name = self.get_canonical_name(link)
+            canonical_name = self.get_canonical_name(link)
+            if canonical_name:
                 canonical_links.add(canonical_name)
-            except OSError:
-                pass
         return canonical_links
 
     def get_text_and_links(self, title):
