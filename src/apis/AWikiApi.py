@@ -42,6 +42,16 @@ class AWikiApi(abc.ABC):
         """
         raise Error("Method not implemented")
 
+    def is_same_node(self, title1, title2):
+        """
+        Returns true IFF title1 and title2 refer to the same article.
+
+        Default implementation compares them based on the canonical name.
+        If an API can guarantee that it will always return the article titles
+        in their canonical form, it can override this behavior with simple string equality.
+        """
+        return self.get_canonical_name(title1) == self.get_canonical_name(title2)
+
     @abc.abstractmethod
     def get_text_and_links(self, title):
         """

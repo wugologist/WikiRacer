@@ -47,6 +47,9 @@ class WikipediaApi(AWikiApi):
         log.debug("Took {} seconds to fetch {} summaries".format(time() - ts, len(titles)))
         return summaries
 
+    def is_same_node(self, title1, title2):
+        return title1 == title2
+
     def get_text_and_links(self, title):
         return self.extract_text_and_links(self.get_page(title))
 

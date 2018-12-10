@@ -23,14 +23,14 @@ class Search:
         visited = set()
         # set up heuristic
         self.heuristic.setup(self.api, start, goal)
-        # items in the queue are (cost, path, data) tuples
+        # items in the queue are (cost, path, node) tuples
         priority_queue.put((0, [start], start))
         while not priority_queue.empty():
             cost, path, node = priority_queue.get()
             if node in visited:
                 continue
             visited.add(node)
-            if node == goal:
+            if api.is_same_node(node, goal):
                 return path, nodes_expanded
             if not self.api.is_valid_article(node):
                 continue
