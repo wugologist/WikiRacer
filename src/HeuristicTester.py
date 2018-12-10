@@ -11,14 +11,14 @@ log = logging.getLogger(__name__)
 
 class HeuristicTester:
     @staticmethod
-    def compare_heuristics(start, stop, api, heuristics: List[AbstractHeuristic]):
+    def compare_heuristics(start, stop, api, greedy: bool, heuristics: List[AbstractHeuristic]):
         agent = WikiAgent.WikiAgent(api)
         results = []
         for heuristic in heuristics:
             log.info("Testing heuristic {} with start {} and end {}"
                      .format(type(heuristic).__name__, start, stop))
             start_time = time.time()
-            path, expanded_count = agent.search(start, stop, heuristic)
+            path, expanded_count = agent.search(start, stop, heuristic, greedy)
             search_time = time.time() - start_time
             log.info("Found path of length {} in {} seconds with {} expansions: {}"
                      .format(len(path),
@@ -28,6 +28,7 @@ class HeuristicTester:
             results.append(
                 {
                     "heuristic": type(heuristic).__name__,
+                    "greedy": greedy,
                     "time_seconds": search_time,
                     "path_length": len(path),
                     "nodes_expanded": expanded_count,
@@ -37,16 +38,3 @@ class HeuristicTester:
             log.info(results)
         return results
 
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-
-    results = HeuristicTester.compare_heuristics(
-        "Fraser_Canyon_Gold_Rush",
-        "British_Empire",
-        [
-            DfsHeuristic(),
-            BfsHeuristic()
-        ]
-    )
-    pprint.pprint(results)
