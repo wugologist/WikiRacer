@@ -31,12 +31,19 @@ class Doc2VecHeuristic(AbstractHeuristic):
 
     def calculate_heuristic(self, node):
         node_summary_array = self.get_summary_array(node)
+        if node_summary_array is None:
+            return float('inf')
         node_summary_vector = self.model.infer_vector(node_summary_array)
         return 0 if node == self.goal else 1 - abs(self.cos_sim(node_summary_vector, self.goal_vector))
 
     def get_summary_array(self, node):
-        node_summary = self.summaries[node] if node in self.summaries else nltk.tokenize.word_tokenize(
-            self.api.get_summaries([node])[node])
+        if node in self.summaries:
+            node_summary = self.summaries[node]
+        else:
+            node_summaries = self.api.get_summaries([node])
+            if node not in node_summaries:
+                return None
+            node_summary = nltk.tokenize.word_tokenize(node_summaries[node])
         if self.is_cleaned:
             node_summary = self.clean(node_summary)
         return node_summary
