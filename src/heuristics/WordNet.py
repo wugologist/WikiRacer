@@ -36,7 +36,7 @@ class WordNetHeuristic(AbstractHeuristic):
             return [word_synsets[0]]
         try:
             neighbors = self.api.get_text_and_links(word)[1]
-            return list(flatmap(lambda title: self.get_first_synset(title), neighbors))
+            return list(flatmap(self.get_first_synset, neighbors))
         except OSError:
             return []
 
