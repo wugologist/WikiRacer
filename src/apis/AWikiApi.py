@@ -56,6 +56,6 @@ class AWikiApi(abc.ABC):
         """
         Get the official name of an article. Useful because we just check string equality for the goal test,
         so we don't want to skip over the goal if e.g. the capitalization is off
-        :return: The canonical name of the given page
+        :return: The canonical name of the given page, or None if none found
         """
         raise Error("Method not implemented")

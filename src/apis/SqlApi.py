@@ -107,7 +107,18 @@ class SqlWikipediaApi(AWikiApi):
 
         For now, the sql wikipedia api just returns the entire page. :bee: :change:
         """
-        return {title: self.get_text_and_links(self.get_canonical_name(title))[0] for title in titles}
+        return {title: self.get_text_and_links(title)[0] for title in titles}
+
+    def make_canonical(self, links):
+        """
+        For every link in links, if the link is valid, return it's canonical name, otherwise don't include it in the resultant set.
+        """
+        canonical_links = set()
+        for link in links:
+            canonical_name = self.get_canonical_name(link)
+            if canonical_name:
+                canonical_links.add(canonical_name)
+        return canonical_links
 
     def get_text_and_links(self, title):
         """
@@ -115,12 +126,12 @@ class SqlWikipediaApi(AWikiApi):
 
         Follows redirects
         """
-        parsed = self.get_parsed_page(self.get_canonical_name(title))
+        parsed = self.get_parsed_page(title)
         text = parsed.strip_code()
         # Exclude any links which would result in an empty target
         links = parsed.ifilter_wikilinks(recursive=True, matches=lambda node: node.title.strip_code().split("#")[0].strip() != "")
         unique_links = set([link.title.strip_code().split("#")[0] for link in links])
-        return text, unique_links
+        return text, self.make_canonical(unique_links)
 
     def get_name_variants(self, title):
         """
@@ -153,11 +164,11 @@ class SqlWikipediaApi(AWikiApi):
             - Recursively call get_canonical_name on the redirect target
         - The article doesn't exist
             - Attempt to perform auto capitalization on the title to see if any of those pages exist, in which case recur on them
-            - If all fails, raise IOError
+            - If all fails, return None
         """
         title = title.replace("_", " ")
         if title in blacklist:
-            raise IOError("{} not a valid page title (in the blacklist {})".format(title, blacklist))
+            return None
         if self.page_exists(title):
             if self.is_redirect_page(title):
                 return self.get_canonical_name(self.get_redirect_target(title), blacklist=blacklist + [title])
@@ -166,11 +177,10 @@ class SqlWikipediaApi(AWikiApi):
         else:
             if try_naming_variants:
                 for variant in self.get_name_variants(title):
-                    try:
-                        return self.get_canonical_name(variant, try_naming_variants=False, blacklist=blacklist + [title])
-                    except IOError:
-                        continue
-            raise IOError("{} not a valid page title".format(title))
+                    variant_canonical_name = self.get_canonical_name(variant, try_naming_variants=False, blacklist=blacklist + [title]);
+                    if variant_canonical_name:
+                        return variant_canonical_name
+            return None
 
 if __name__ == "__main__":
     api = SqlWikipediaApi();

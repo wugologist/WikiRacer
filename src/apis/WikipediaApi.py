@@ -74,7 +74,7 @@ class WikipediaApi(AWikiApi):
         """
         page = self.get_page(title)
         if page.status_code != 200:
-            raise IOError("{} not a valid page title".format(title))
+            return None
         return page.url.split("/")[-1]
 
     class WikipediaSummaryWorker(Thread):
