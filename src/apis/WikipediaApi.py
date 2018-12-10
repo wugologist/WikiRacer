@@ -57,8 +57,8 @@ class WikipediaApi(AWikiApi):
     def extract_text_and_links(page):
         response = BeautifulSoup(page.text, 'html.parser')
         links = response.find_all('a')
-        # TODO: This link parsing needs to be fixed to get all the links we want and nothing else
-        unique_links = set([link["href"].split("/")[-1].split("#")[0]
+        prefix = "./"
+        unique_links = set([link["href"][len(prefix):].split("#")[0]
                             for link in links
                             if link["href"].startswith("./")
                             and ":" not in link["href"]
