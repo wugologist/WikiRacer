@@ -106,7 +106,7 @@ class TfidfHeuristic(AbstractHeuristic):
 
     def calculate_heuristic(self, node):
         if node not in self.summaries:
-            log.warning("Node {} not fetched")
+            log.warning("Node {} not fetched".format(node))
             return float("inf")
         node_text = self.summaries[node]
         node_transform = self.tfidf.get_transform(node_text)
