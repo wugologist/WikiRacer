@@ -9,15 +9,17 @@ from heuristics.Heuristics import AbstractHeuristic
 
 
 class Doc2VecHeuristic(AbstractHeuristic):
-    def __init__(self, cleaned):
-        self.model = Doc2Vec.load("../models/" + ("doc2vec_cleaned" if cleaned else "doc2vec"))
+    def __init__(self, is_cleaned):
+        self.model = None
         self.api = None
         self.goal_vector = None
         self.summaries = {}
         self.goal = None
-        self.cleaned = cleaned
+        self.is_cleaned = is_cleaned
 
     def setup(self, api, start, goal):
+        self.model = Doc2Vec.load(
+            "models/" + ("doc2vec_cleaned" if self.is_cleaned else "doc2vec"))
         self.api = api
         goal_summary_array = self.get_summary_array(goal)
         self.goal_vector = self.model.infer_vector(doc_words=goal_summary_array, alpha=0.025, steps=20)
@@ -33,18 +35,17 @@ class Doc2VecHeuristic(AbstractHeuristic):
         return 0 if node == self.goal else 1 - abs(self.cos_sim(node_summary_vector, self.goal_vector))
 
     def get_summary_array(self, node):
-        node_summary = self.summaries[node] if node in self.summaries else nltk.tokenize.word_tokenize(self.api.get_summaries([node])[node])
-        if self.cleaned:
+        node_summary = self.summaries[node] if node in self.summaries else nltk.tokenize.word_tokenize(
+            self.api.get_summaries([node])[node])
+        if self.is_cleaned:
             node_summary = self.clean(node_summary)
         return node_summary
 
     def get_multiple_summary_arrays(self, neighbors):
         summaries = self.api.get_summaries(neighbors)
-        if self.cleaned:
-            new_dict = {}
-            for neighbor in summaries:
-                new_dict[neighbor] = self.clean(nltk.tokenize.word_tokenize(summaries[neighbor]))
-            summaries = new_dict
+        if self.is_cleaned:
+            summaries = {neighbor: self.clean(nltk.tokenize.word_tokenize(summaries[neighbor])) for neighbor in
+                         summaries}
         return summaries
 
     @staticmethod
