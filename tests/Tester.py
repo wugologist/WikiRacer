@@ -3,7 +3,7 @@ import datetime
 import logging
 import os
 
-from heuristics import Heuristics, TFIDF, Doc2Vec, WordNet
+from heuristics import TFIDF, Doc2Vec, WordNet
 
 from apis import WikipediaApi
 from src import HeuristicTester
@@ -14,8 +14,12 @@ log = logging.getLogger(__name__)
 test_file_path = "tests.txt"
 
 api = WikipediaApi.WikipediaApi()
-heuristics = [Heuristics.BfsHeuristic(), Doc2Vec.Doc2VecHeuristic(True),
-              WordNet.WordNetHeuristic(), TFIDF.TfidfHeuristic("../corpora/1000.txt", 10)]
+heuristics = [
+    Heuristics.BfsHeuristic(),
+    Doc2Vec.Doc2VecHeuristic(True),
+    WordNet.WordNetHeuristic(),
+    TFIDF.TfidfHeuristic("../corpora/1000.txt", 10)
+]
 
 
 def run_tests():
@@ -36,7 +40,7 @@ def run_tests():
     with open(results_file_path, 'w', newline='') as f:
         writer = csv.writer(f, delimiter='\t')
         writer.writerow(
-            ["start", "goal", "heuristic", "greedy" "time_seconds", "nodes_expanded", "path_length", "path"])
+            ["start", "goal", "heuristic", "greedy", "time_seconds", "nodes_expanded", "path_length", "path"])
         for test in tests:
             start, goal = test
             writer.writerows(run_one_test(start, goal))
@@ -58,5 +62,5 @@ def run_one_test(start, goal):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     run_tests()
