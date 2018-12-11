@@ -20,6 +20,17 @@ class WikipediaApi(AWikiApi):
         self.headers = {'User-Agent': 'wong.mich@husky.neu.edu'}  # Wikipedia asks to provide contact info in user agent
         self.cache = dict()  # cache page summaries to avoid duplicate requests
         self.worker_count = 8
+        self.worker_queue = Queue()
+        self.summaries = dict()
+
+        self.initialize_workers()
+
+    def initialize_workers(self):
+        for x in range(self.worker_count):
+            worker = self.WikipediaSummaryWorker(self.worker_queue, self.api_root, self.headers,
+                                                 self.summaries, self.cache)
+            worker.daemon = True
+            worker.start()
 
     def get_page(self, title):
         url = self.api_root + "page/html/" + urllib.parse.quote(title, safe='')
@@ -36,17 +47,11 @@ class WikipediaApi(AWikiApi):
         :return: A dict of titles to summary strings
         """
         ts = time()
-        queue = Queue()
-        summaries = dict()
-        for x in range(self.worker_count):
-            worker = self.WikipediaSummaryWorker(queue, self.api_root, self.headers, summaries, self.cache)
-            worker.daemon = True
-            worker.start()
         for title in titles:
-            queue.put(title)
-        queue.join()
+            self.worker_queue.put(title)
+        self.worker_queue.join()
         log.debug("Took {} seconds to fetch {} summaries".format(time() - ts, len(titles)))
-        return summaries
+        return self.summaries
 
     def get_text_and_links(self, title):
         return self.extract_text_and_links(self.get_page(title))
