@@ -47,6 +47,7 @@ class WikipediaApi(AWikiApi):
         :return: A dict of titles to summary strings
         """
         ts = time()
+        self.summaries.clear()  # clear any old results
         for title in titles:
             self.worker_queue.put(title)
         self.worker_queue.join()
