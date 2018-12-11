@@ -3,6 +3,7 @@ import logging
 from queue import Queue
 from threading import Thread
 from time import time
+import urllib.parse
 
 import requests
 from bs4 import BeautifulSoup
@@ -21,7 +22,7 @@ class WikipediaApi(AWikiApi):
         self.worker_count = 8
 
     def get_page(self, title):
-        url = self.api_root + "page/html/" + title
+        url = self.api_root + "page/html/" + urllib.parse.quote(title, safe='')
         return requests.get(url, headers=self.headers)
 
     def get_random_page(self):
@@ -57,10 +58,10 @@ class WikipediaApi(AWikiApi):
     def extract_text_and_links(page):
         response = BeautifulSoup(page.text, 'html.parser')
         links = response.find_all('a')
-        # TODO: This link parsing needs to be fixed to get all the links we want and nothing else
-        unique_links = set([link["href"].split("/")[-1].split("#")[0]
+        prefix = "./"
+        unique_links = set([link["href"][len(prefix):].split("#")[0]
                             for link in links
-                            if link["href"].startswith("./")
+                            if link["href"].startswith(prefix)
                             and ":" not in link["href"]
                             and "class" not in link.attrs.keys()])  # ignore broken links and other special cases
         parsed_text = " ".join(map(lambda x: x.text, response.find_all("p")))
@@ -75,7 +76,7 @@ class WikipediaApi(AWikiApi):
         page = self.get_page(title)
         if page.status_code != 200:
             return None
-        return page.url.split("/")[-1]
+        return urllib.parse.unquote(page.url.split("/")[-1])
 
     class WikipediaSummaryWorker(Thread):
         def __init__(self, queue, api_root, headers, results, cache):
@@ -94,12 +95,14 @@ class WikipediaApi(AWikiApi):
                     self.results[title] = self.cache[title]
                     self.queue.task_done()
                 else:
-                    url = self.api_root + "page/summary/" + title
+                    url = self.api_root + "page/summary/" + urllib.parse.quote(title, safe='')
                     response = requests.get(url, headers=self.headers)
                     try:
                         if response.status_code == 200:
                             summary = json.loads(response.text)["extract"]
                             self.results[title] = summary
                             self.cache[title] = summary
+                        else:
+                            log.warning("Status code {} for page {}".format(response.status_code, title))
                     finally:
                         self.queue.task_done()
