@@ -16,14 +16,8 @@ class AWikiApi(abc.ABC):
     def is_valid_article(self, title):
         """
         Return True IFF the page has a canonical name.
-        
-        TODO This should be memoized which would improve performance a ton.
         """
-        try:
-            self.get_canonical_name(title)
-            return True
-        except IOError:
-            return False
+        return self.get_canonical_name(title) is not None
 
     def get_random_page(self):
         """
@@ -56,6 +50,6 @@ class AWikiApi(abc.ABC):
         """
         Get the official name of an article. Useful because we just check string equality for the goal test,
         so we don't want to skip over the goal if e.g. the capitalization is off
-        :return: The canonical name of the given page
+        :return: The canonical name of the given page, or None if none found
         """
         raise Error("Method not implemented")

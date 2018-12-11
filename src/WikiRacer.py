@@ -10,7 +10,7 @@ import HeuristicTester
 from apis.LocalApi import LocalWikipediaApi as LocalApi
 from apis.SqlApi import SqlWikipediaApi as SqlApi
 from apis.WikipediaApi import WikipediaApi
-from heuristics import Heuristics, TFIDF, Doc2Vec
+from heuristics import Heuristics, TFIDF, WordNet, Doc2Vec
 
 apis = {
     "WikipediaApi": WikipediaApi,
@@ -23,6 +23,7 @@ heuristics = {
     "dfs": Heuristics.DfsHeuristic(),
     "null": Heuristics.NullHeuristic(),
     "tfidf": TFIDF.TfidfHeuristic("corpora/1000.txt", 10),
+    "wordnet": WordNet.WordNetHeuristic(),
     "doc2vec": Doc2Vec.Doc2VecHeuristic(True)
 }
 
@@ -108,6 +109,10 @@ def run_search(arguments):
 
     start = api.get_canonical_name(arguments.start)
     goal = api.get_canonical_name(arguments.goal)
+
+    if not start or not goal:
+        raise OSError("Unable to get canonical name for either start or goal. Canonical Names: Start={}, Goal={}".format(start, goal))
+
     HeuristicTester.HeuristicTester.compare_heuristics(start, goal, api, arguments.greedy, [heuristic])
 
 
