@@ -10,7 +10,7 @@ import HeuristicTester
 from apis.LocalApi import LocalWikipediaApi as LocalApi
 from apis.SqlApi import SqlWikipediaApi as SqlApi
 from apis.WikipediaApi import WikipediaApi
-from heuristics import Heuristics, TFIDF, WordNet
+from heuristics import Heuristics, TFIDF, WordNet, Doc2Vec
 
 apis = {
     "WikipediaApi": WikipediaApi,
@@ -24,6 +24,7 @@ heuristics = {
     "null": Heuristics.NullHeuristic(),
     "tfidf": TFIDF.TfidfHeuristic("corpera/1000.txt", 10),
     "wordnet": WordNet.WordNetHeuristic(),
+    "doc2vec": Doc2Vec.Doc2VecHeuristic(True)
 }
 
 log = logging.getLogger(__name__)
