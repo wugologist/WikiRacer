@@ -19,9 +19,8 @@ class Doc2VecHeuristic(AbstractHeuristic):
         self.is_cleaned = is_cleaned
 
     def setup(self, api, start, goal):
-        self.model = Doc2Vec.load(
-            os.path.abspath(__file__)[:-len("src\\heuristics\\Doc2Vec.py")] + "models\\" +
-            ("doc2vec_cleaned" if self.is_cleaned else "doc2vec"))
+        models_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "models")
+        self.model = Doc2Vec.load(os.path.join(models_path, ("doc2vec_cleaned" if self.is_cleaned else "doc2vec")))
         self.api = api
         goal_summary_array = self.get_summary_array(goal)
         self.goal_vector = self.model.infer_vector(doc_words=goal_summary_array, alpha=0.025, steps=20)
