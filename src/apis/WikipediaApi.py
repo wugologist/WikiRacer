@@ -96,8 +96,8 @@ class WikipediaApi(AWikiApi):
                     self.queue.task_done()
                 else:
                     url = self.api_root + "page/summary/" + urllib.parse.quote(title, safe='')
-                    response = requests.get(url, headers=self.headers)
                     try:
+                        response = requests.get(url, headers=self.headers)
                         if response.status_code == 200:
                             summary = json.loads(response.text)["extract"]
                             self.results[title] = summary
