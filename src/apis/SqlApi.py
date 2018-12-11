@@ -7,6 +7,7 @@ import mwparserfromhell
 from titlecase import titlecase
 from .AWikiApi import AWikiApi
 import itertools
+import functools
 
 log = logging.getLogger(__name__)
 
@@ -107,7 +108,18 @@ class SqlWikipediaApi(AWikiApi):
 
         For now, the sql wikipedia api just returns the entire page. :bee: :change:
         """
-        return {title: self.get_text_and_links(self.get_canonical_name(title))[0] for title in titles}
+        return {title: self.get_text_and_links(title)[0] for title in titles}
+
+    def make_canonical(self, links):
+        """
+        For every link in links, if the link is valid, return it's canonical name, otherwise don't include it in the resultant set.
+        """
+        canonical_links = set()
+        for link in links:
+            canonical_name = self.get_canonical_name(link)
+            if canonical_name:
+                canonical_links.add(canonical_name)
+        return canonical_links
 
     def get_text_and_links(self, title):
         """
@@ -115,12 +127,12 @@ class SqlWikipediaApi(AWikiApi):
 
         Follows redirects
         """
-        parsed = self.get_parsed_page(self.get_canonical_name(title))
+        parsed = self.get_parsed_page(title)
         text = parsed.strip_code()
         # Exclude any links which would result in an empty target
         links = parsed.ifilter_wikilinks(recursive=True, matches=lambda node: node.title.strip_code().split("#")[0].strip() != "")
         unique_links = set([link.title.strip_code().split("#")[0] for link in links])
-        return text, unique_links
+        return text, self.make_canonical(unique_links)
 
     def get_name_variants(self, title):
         """
@@ -137,7 +149,7 @@ class SqlWikipediaApi(AWikiApi):
         """
         return [title.capitalize(), titlecase(title), title.title(), title.lower(), title.upper()]
 
-    def get_canonical_name(self, title, try_naming_variants=True, blacklist=[]):
+    def get_canonical_name_helper(self, title, try_naming_variants=True, blacklist=[]):
         """
         Get the official name of an article. Useful because we just check string equality for the goal test,
         so we don't want to skip over the goal if e.g. the capitalization is off
@@ -146,31 +158,40 @@ class SqlWikipediaApi(AWikiApi):
         If try_naming_variants is true, attempt to try other capitalizations of the name.
         This should be on most times, but not when we recur during the process of autocapitalization.
 
+        This is the uncached version because it needs to keep track of a blacklist (which can't be cached)
+
         Cases:
         - The article name is correct
             - Use the article title as is
         - The article is a redirection page
-            - Recursively call get_canonical_name on the redirect target
+            - Recursively call get_canonical_name_helper on the redirect target
         - The article doesn't exist
             - Attempt to perform auto capitalization on the title to see if any of those pages exist, in which case recur on them
-            - If all fails, raise IOError
+            - If all fails, return None
         """
         title = title.replace("_", " ")
         if title in blacklist:
-            raise IOError("{} not a valid page title (in the blacklist {})".format(title, blacklist))
+            return None
         if self.page_exists(title):
             if self.is_redirect_page(title):
-                return self.get_canonical_name(self.get_redirect_target(title), blacklist=blacklist + [title])
+                return self.get_canonical_name_helper(self.get_redirect_target(title), blacklist=blacklist + [title])
             else:
                 return title
         else:
             if try_naming_variants:
                 for variant in self.get_name_variants(title):
-                    try:
-                        return self.get_canonical_name(variant, try_naming_variants=False, blacklist=blacklist + [title])
-                    except IOError:
-                        continue
-            raise IOError("{} not a valid page title".format(title))
+                    variant_canonical_name = self.get_canonical_name_helper(variant, try_naming_variants=False, blacklist=blacklist + [title]);
+                    if variant_canonical_name:
+                        return variant_canonical_name
+            return None
+
+    @functools.lru_cache(maxsize=1024)
+    def get_canonical_name(self, title):
+        """
+        A cacheable version of get_canonical_name_helper.
+        Just defers to get_canonical_name_helper for cache misses.
+        """
+        return self.get_canonical_name_helper(title)
 
 if __name__ == "__main__":
     api = SqlWikipediaApi();
