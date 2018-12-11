@@ -1,3 +1,4 @@
+import os
 import string
 
 import nltk
@@ -19,7 +20,8 @@ class Doc2VecHeuristic(AbstractHeuristic):
 
     def setup(self, api, start, goal):
         self.model = Doc2Vec.load(
-            "models/" + ("doc2vec_cleaned" if self.is_cleaned else "doc2vec"))
+            os.path.abspath(__file__)[:-len("src\\heuristics\\Doc2Vec.py")] + "models\\" +
+            ("doc2vec_cleaned" if self.is_cleaned else "doc2vec"))
         self.api = api
         goal_summary_array = self.get_summary_array(goal)
         self.goal_vector = self.model.infer_vector(doc_words=goal_summary_array, alpha=0.025, steps=20)

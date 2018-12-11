@@ -3,7 +3,7 @@ import datetime
 import logging
 import os
 
-from heuristics import Heuristics, TFIDF, Doc2Vec
+from heuristics import Heuristics, TFIDF, Doc2Vec, WordNet
 
 from apis import WikipediaApi
 from src import HeuristicTester
@@ -14,7 +14,8 @@ log = logging.getLogger(__name__)
 test_file_path = "tests.txt"
 
 api = WikipediaApi.WikipediaApi()
-heuristics = [Heuristics.BfsHeuristic(), Doc2Vec.Doc2VecHeuristic(True)]
+heuristics = [Heuristics.BfsHeuristic(), Doc2Vec.Doc2VecHeuristic(True),
+              WordNet.WordNetHeuristic(), TFIDF.TfidfHeuristic("../corpora/1000.txt", 10)]
 
 
 def run_tests():
