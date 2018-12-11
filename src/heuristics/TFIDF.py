@@ -90,6 +90,8 @@ class TfidfHeuristic(AbstractHeuristic):
 
     def setup(self, api, start, goal):
         log.info("Initializing TFIDF heuristic")
+        nltk.download('stopwords')
+        nltk.download('punkt')
         self.api = api
         self.tfidf = Tfidf()
         self.tfidf.setup(self.corpus_filename)
