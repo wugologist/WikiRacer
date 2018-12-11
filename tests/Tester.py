@@ -43,8 +43,9 @@ def run_tests():
             ["start", "goal", "heuristic", "greedy", "time_seconds", "nodes_expanded", "path_length", "path"])
         for test in tests:
             start, goal = test
-            writer.writerows(run_one_test(start, goal))
-
+            for row in run_one_test(start, goal):
+                writer.writerow(row)
+                f.flush()
 
 def run_one_test(start, goal):
     log.info("Testing {} -> {}".format(start, goal))
@@ -52,14 +53,14 @@ def run_one_test(start, goal):
     for greedy in [True, False]:
         log.info("Running search test {} {} {} {} {}".format(start, goal, api, greedy,
                                                              list(map(lambda h: type(h).__name__, heuristics))))
-        res = HeuristicTester.HeuristicTester.compare_heuristics(start, goal, api, greedy, heuristics)
-        for r in res:
-            row = map(str,
-                      [start, goal, r["heuristic"], r["greedy"],
-                       r["time_seconds"], r["nodes_expanded"], r["path_length"], r["path"]])
-            ans_list.append(row)
-    return ans_list
-
+        try:
+            for r in HeuristicTester.HeuristicTester.compare_heuristics(start, goal, api, greedy, heuristics):
+                row = map(str,
+                          [start, goal, r["heuristic"], r["greedy"],
+                           r["time_seconds"], r["nodes_expanded"], r["path_length"], r["path"]])
+                yield row
+        except Exception as e:
+            log.error("Error when running test... Skipping to next test case.", e)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)

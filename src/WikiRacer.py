@@ -113,7 +113,8 @@ def run_search(arguments):
     if not start or not goal:
         raise OSError("Unable to get canonical name for either start or goal. Canonical Names: Start={}, Goal={}".format(start, goal))
 
-    HeuristicTester.HeuristicTester.compare_heuristics(start, goal, api, arguments.greedy, [heuristic])
+    for result in HeuristicTester.HeuristicTester.compare_heuristics(start, goal, api, arguments.greedy, [heuristic]):
+        pass
 
 
 if __name__ == "__main__":

@@ -25,7 +25,7 @@ class HeuristicTester:
                              search_time,
                              expanded_count,
                              path if len(path) < 10 else path[0:5] + ["..."] + path[-5:]))
-            results.append(
+            yield (
                 {
                     "heuristic": type(heuristic).__name__,
                     "greedy": greedy,
@@ -36,5 +36,4 @@ class HeuristicTester:
                 }
             )
             log.info(results)
-        return results
 
