@@ -22,8 +22,8 @@ class Tfidf:
     @staticmethod
     def load_or_create_model(corpus_filename):
         model_filename = "{}.model".format(os.path.basename(corpus_filename))
-        path = "models/"
-        model_path = path + model_filename
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "models")
+        model_path = os.path.join(path, model_filename)
         if not os.path.isdir(path):
             log.info("Creating directory {}".format(path))
             os.makedirs(path)

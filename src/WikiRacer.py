@@ -22,7 +22,7 @@ heuristics = {
     "bfs": Heuristics.BfsHeuristic(),
     "dfs": Heuristics.DfsHeuristic(),
     "null": Heuristics.NullHeuristic(),
-    "tfidf": TFIDF.TfidfHeuristic("corpera/1000.txt", 10),
+    "tfidf": TFIDF.TfidfHeuristic("corpora/1000.txt", 10),
     "wordnet": WordNet.WordNetHeuristic(),
     "doc2vec": Doc2Vec.Doc2VecHeuristic(True)
 }
