@@ -19,6 +19,8 @@ class Doc2VecHeuristic(AbstractHeuristic):
         self.is_cleaned = is_cleaned
 
     def setup(self, api, start, goal):
+        nltk.download('stopwords')
+        nltk.download('punkt')
         models_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "models")
         self.model = Doc2Vec.load(os.path.join(models_path, ("doc2vec_cleaned" if self.is_cleaned else "doc2vec")))
         self.api = api
