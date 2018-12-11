@@ -59,7 +59,7 @@ def run_one_test(start, goal):
                           [start, goal, r["heuristic"], r["greedy"],
                            r["time_seconds"], r["nodes_expanded"], r["path_length"], r["path"]])
                 yield row
-        except e:
+        except Exception as e:
             log.error("Error when running test... Skipping to next test case.", e)
 
 if __name__ == "__main__":
