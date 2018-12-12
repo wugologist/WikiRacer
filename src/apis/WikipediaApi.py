@@ -17,7 +17,7 @@ logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)  # Don't wan
 class WikipediaApi(AWikiApi):
     def __init__(self):
         self.api_root = "https://en.wikipedia.org/api/rest_v1/"
-        self.headers = {'User-Agent': 'wong.mich@husky.neu.edu'}  # Wikipedia asks to provide contact info in user agent
+        self.headers = {'User-Agent': 'your@email.here'}  # Wikipedia asks to provide contact info in user agent
         self.cache = dict()  # cache page summaries to avoid duplicate requests
         self.worker_count = 8
         self.worker_queue = Queue()
